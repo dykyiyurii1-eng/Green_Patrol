@@ -1,0 +1,129 @@
+import { SimulationGrid } from './grid';
+import { TerrainType, WatchTower, PlanningBudgetConfig } from './types';
+import { DEFAULT_WATCH_TOWER_CONFIG } from './config';
+
+export interface PlayerAction {
+  type: 'firebreak' | 'watchtower';
+  x: number;
+  y: number;
+  cost: number;
+  originalTerrain?: TerrainType;
+}
+
+export class PlanningManager {
+  readonly grid: SimulationGrid;
+  readonly budgetConfig: PlanningBudgetConfig;
+  readonly actions: PlayerAction[];
+  budgetUsed: number;
+
+  constructor(grid: SimulationGrid, budgetConfig: PlanningBudgetConfig) {
+    this.grid = grid;
+    this.budgetConfig = budgetConfig;
+    this.actions = [];
+    this.budgetUsed = 0;
+  }
+
+  get remainingBudget(): number {
+    return this.budgetConfig.totalBudget - this.budgetUsed;
+  }
+
+  canAfford(cost: number): boolean {
+    return this.budgetUsed + cost <= this.budgetConfig.totalBudget;
+  }
+
+  placeFirebreak(x: number, y: number): boolean {
+    if (!this.grid.inBounds(x, y)) {
+      return false;
+    }
+
+    const idx = this.grid.getIndex(x, y);
+    const currentTerrain = this.grid.terrain[idx];
+
+    // Cannot place firebreak on water or if it's already a firebreak
+    if (currentTerrain === TerrainType.WATER || currentTerrain === TerrainType.FIREBREAK) {
+      return false;
+    }
+
+    const cost = this.budgetConfig.firebreakCostPerCell;
+    if (!this.canAfford(cost)) {
+      return false;
+    }
+
+    this.budgetUsed += cost;
+    this.actions.push({
+      type: 'firebreak',
+      x,
+      y,
+      cost,
+      originalTerrain: currentTerrain,
+    });
+
+    this.grid.terrain[idx] = TerrainType.FIREBREAK;
+    return true;
+  }
+
+  placeWatchTower(
+    x: number,
+    y: number,
+    radius: number = DEFAULT_WATCH_TOWER_CONFIG.radius,
+    mitigationFactor: number = DEFAULT_WATCH_TOWER_CONFIG.mitigationFactor
+  ): boolean {
+    if (!this.grid.inBounds(x, y)) {
+      return false;
+    }
+
+    const cost = this.budgetConfig.watchTowerCost;
+    if (!this.canAfford(cost)) {
+      return false;
+    }
+
+    // Check if tower already exists at or very near this location
+    const alreadyExists = this.grid.watchTowers.some((t) => t.x === x && t.y === y);
+    if (alreadyExists) {
+      return false;
+    }
+
+    const tower: WatchTower = { x, y, radius, mitigationFactor };
+    this.budgetUsed += cost;
+    this.actions.push({
+      type: 'watchtower',
+      x,
+      y,
+      cost,
+    });
+
+    this.grid.watchTowers.push(tower);
+    return true;
+  }
+
+  undo(): boolean {
+    const lastAction = this.actions.pop();
+    if (!lastAction) {
+      return false;
+    }
+
+    this.budgetUsed = Math.max(0, this.budgetUsed - lastAction.cost);
+
+    if (lastAction.type === 'firebreak' && lastAction.originalTerrain !== undefined) {
+      const idx = this.grid.getIndex(lastAction.x, lastAction.y);
+      this.grid.terrain[idx] = lastAction.originalTerrain;
+    } else if (lastAction.type === 'watchtower') {
+      const towerIdx = this.grid.watchTowers.findIndex(
+        (t) => t.x === lastAction.x && t.y === lastAction.y
+      );
+      if (towerIdx !== -1) {
+        this.grid.watchTowers.splice(towerIdx, 1);
+      }
+    }
+
+    return true;
+  }
+
+  reset(originalGrid: SimulationGrid): void {
+    this.actions.length = 0;
+    this.budgetUsed = 0;
+    this.grid.terrain.set(originalGrid.terrain);
+    this.grid.state.set(originalGrid.state);
+    this.grid.watchTowers = originalGrid.watchTowers.map((t) => ({ ...t }));
+  }
+}

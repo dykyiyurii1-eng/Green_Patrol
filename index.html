@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Зелений Патруль | Green Patrol - Wildfire Simulation</title>
+    <link rel="stylesheet" href="./src/ui/style.css" />
+  </head>
+  <body>
+    <header>
+      <div class="logo-area">
+        <span class="logo-icon">🌲🔥</span>
+        <div class="logo-title">
+          <h1>Зелений Патруль (Green Patrol)</h1>
+          <p>Симулятор протипожежного захисту лісів • GENIUS Olympiad</p>
+        </div>
+      </div>
+
+      <div class="mode-switcher">
+        <button id="mode-planning-btn" class="mode-btn active">
+          🛡️ Режим планування
+        </button>
+        <button id="mode-sandbox-btn" class="mode-btn">
+          🧪 Пісочниця
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <!-- Simulation Canvas Viewport -->
+      <section class="viewport-container">
+        <div class="canvas-wrapper">
+          <canvas id="sim-canvas" width="600" height="600"></canvas>
+        </div>
+
+        <div class="canvas-legend">
+          <div class="legend-item">
+            <span class="legend-color" style="background: #2e7d32"></span>
+            <span>Ліс</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #8bc34a"></span>
+            <span>Трава</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #0288d1"></span>
+            <span>Вода</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #d7ccc8"></span>
+            <span>Протипожежна смуга</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #006064"></span>
+            <span>Дозорна вежа</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #ff5722"></span>
+            <span>Вогонь</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #212121"></span>
+            <span>Згарище</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sidebar Controls -->
+      <aside class="sidebar">
+        <!-- Scenario Selector Card -->
+        <div class="card">
+          <div class="card-title">📍 Сценарій локації</div>
+          <div class="scenario-select-wrapper">
+            <select id="scenario-select">
+              <option value="pine-forest">Сосновий бір (Рівнина, річка, помірний вітер)</option>
+              <option value="steppe-wind">Степовий вітер (Сухість, сильний вітер)</option>
+              <option value="black-forest-hills">Пагорби Чорного лісу (Рельєф, підйом на схил)</option>
+            </select>
+          </div>
+          <p id="scenario-description" class="scenario-desc">
+            Рівнинний густий сосновий масив із річкою та дорогою. Помірний західний вітер штовхає полум’я на схід. Завдання: локалізувати пожежу до того, як вона перекинеться на заповідні ділянки.
+          </p>
+        </div>
+
+        <!-- Planning Mode Controls -->
+        <div id="planning-panel" class="card">
+          <div class="card-title">🛡️ Фаза 1: Підготовка та захист</div>
+
+          <div class="budget-container">
+            <div class="control-label">
+              <span>Доступний бюджет:</span>
+              <span id="budget-text">0 / 120 балів</span>
+            </div>
+            <div class="budget-bar-bg">
+              <div id="budget-progress" class="budget-bar-fill"></div>
+            </div>
+          </div>
+
+          <div class="btn-group">
+            <button id="tool-firebreak-btn" class="btn active">
+              🚧 Протипожежна смуга (2 б)
+            </button>
+            <button id="tool-watchtower-btn" class="btn">
+              🗼 Дозорна вежа (20 б)
+            </button>
+            <button id="undo-btn" class="btn">
+              ↩️ Скасувати
+            </button>
+            <button id="reset-plan-btn" class="btn">
+              🔄 Очистити план
+            </button>
+          </div>
+
+          <button id="start-fire-btn" class="btn btn-primary">
+            🚀 Розпочати симуляцію пожежі
+          </button>
+        </div>
+
+        <!-- Sandbox Mode Controls -->
+        <div id="sandbox-panel" class="card hidden">
+          <div class="card-title">🧪 Інструменти пісочниці</div>
+
+          <div class="btn-group">
+            <button id="tool-ignite-btn" class="btn active">
+              🔥 Запалити клітинку
+            </button>
+            <button id="tool-sandbox-firebreak-btn" class="btn">
+              🚧 Смуга
+            </button>
+            <button id="tool-forest-btn" class="btn">
+              🌲 Ліс
+            </button>
+            <button id="tool-water-btn" class="btn">
+              💧 Водойма
+            </button>
+          </div>
+
+          <div class="control-row">
+            <div class="control-label">
+              <span>Швидкість вітру:</span>
+              <span id="wind-speed-val">6.0 м/с</span>
+            </div>
+            <input id="wind-speed-slider" type="range" min="0" max="25" step="0.5" value="6" />
+          </div>
+
+          <div class="control-row">
+            <div class="control-label">
+              <span>Напрямок вітру:</span>
+              <span id="wind-dir-val">90° (Схід)</span>
+            </div>
+            <div class="compass-container">
+              <input id="wind-dir-slider" type="range" min="0" max="355" step="5" value="90" />
+              <div class="compass-dial">
+                <span id="compass-arrow" class="compass-needle" style="transform: rotate(90deg)">⬆️</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="control-row">
+            <div class="control-label">
+              <span>Відносна вологість:</span>
+              <span id="humidity-val">42%</span>
+            </div>
+            <input id="humidity-slider" type="range" min="0" max="100" step="1" value="42" />
+          </div>
+
+          <div class="btn-group">
+            <button id="sandbox-play-btn" class="btn btn-primary">
+              ▶️ Старт
+            </button>
+            <button id="sandbox-reset-btn" class="btn">
+              🔄 Скинути
+            </button>
+          </div>
+        </div>
+
+        <!-- Simulation Execution Controls -->
+        <div id="sim-controls-panel" class="card hidden">
+          <div class="card-title">⏱️ Керування часом пожежі</div>
+          <div class="btn-group">
+            <button id="play-pause-btn" class="btn">
+              ⏸️ Пауза
+            </button>
+            <button id="speed-1-btn" class="btn active">
+              1x
+            </button>
+            <button id="speed-2-btn" class="btn">
+              2x
+            </button>
+            <button id="speed-5-btn" class="btn">
+              5x
+            </button>
+            <button id="step-btn" class="btn">
+              ⏭️ 1 крок
+            </button>
+          </div>
+        </div>
+
+        <!-- Real-time Statistics Card -->
+        <div class="card">
+          <div class="card-title">📊 Моніторинг екосистеми</div>
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="stat-label">Врятовано лісу</div>
+              <div id="stat-saved" class="stat-value">100.0%</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Кроків часу</div>
+              <div id="stat-ticks" class="stat-value">0</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Горить клітинок</div>
+              <div id="stat-burning" class="stat-value burning">0</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Згарище (вигоріло)</div>
+              <div id="stat-burned" class="stat-value burned">0</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Results Modal (Phase 3 of Planning Mode) -->
+    <div id="results-modal" class="modal-backdrop hidden">
+      <div class="modal-card">
+        <h2 class="modal-title">🏆 Результати протипожежної операції</h2>
+
+        <div class="modal-metrics">
+          <div class="modal-metric-row">
+            <span>Врятовано лісу з вашим планом:</span>
+            <span id="result-saved-val" class="metric-val positive">87.5%</span>
+          </div>
+          <div class="modal-metric-row">
+            <span>Базовий сценарій (без жодних дій):</span>
+            <span id="result-baseline-val" class="metric-val">45.0%</span>
+          </div>
+          <div class="modal-metric-row">
+            <span>Ефективність вашої стратегії:</span>
+            <span id="result-diff-val" class="metric-val positive">+42.5%</span>
+          </div>
+          <div class="modal-metric-row">
+            <span>Використано бюджету:</span>
+            <span id="result-budget-val" class="metric-val">110 / 120 балів</span>
+          </div>
+        </div>
+
+        <div id="result-feedback-text" class="modal-feedback">
+          Відмінна стратегія! Ви побудували надійні протипожежні розриви та врахували напрямок вітру.
+        </div>
+
+        <button id="retry-btn" class="btn btn-primary">
+          🔄 Спробувати інший план
+        </button>
+      </div>
+    </div>
+
+    <footer>
+      Green Patrol (Зелений Патруль) &copy; 2026-2027 • Проект для GENIUS Olympiad (Coding Category)
+    </footer>
+
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>
