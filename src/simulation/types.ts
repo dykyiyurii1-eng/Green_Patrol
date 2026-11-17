@@ -10,11 +10,14 @@ export enum CellState {
 }
 
 export enum TerrainType {
-  FOREST = 0,
-  GRASS = 1,
-  WATER = 2,
-  ROAD = 3,
-  FIREBREAK = 4,
+  FOREST = 0, // Густі дерева
+  GRASS = 1, // Звичайна трава
+  WATER = 2, // Водойма (річка, озеро, ставок)
+  ROAD = 3, // Дорога
+  FIREBREAK = 4, // Мінералізована протипожежна смуга (рів)
+  BUSHES = 5, // Сухі кущі (швидко займаються)
+  HOUSES = 6, // Хатинки селища фермера (ціль оборони!)
+  WET_GROUND = 7, // Мокра земля / пісок біля води (не горить)
 }
 
 export interface WatchTower {
@@ -48,15 +51,20 @@ export interface SimulationConfig {
   a_slope: number;
   /** How many simulation ticks a cell stays in BURNING state before transitioning to BURNED */
   burnDuration: number;
+  /** Radius around active fire where building is prohibited (danger heat zone) */
+  heatDangerRadius: number;
 }
 
 export interface SimulationMetrics {
   totalCells: number;
   initialForestCells: number;
   currentUnburnedForest: number;
+  initialHouseCells: number;
+  currentUnburnedHouses: number;
   currentBurning: number;
   currentBurned: number;
   forestSavedPercent: number;
+  villageSavedPercent: number;
   ticks: number;
   isComplete: boolean;
 }

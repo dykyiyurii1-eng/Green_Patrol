@@ -15,16 +15,14 @@ const NEIGHBORS = [
 ];
 
 /**
- * Executes a single discrete time tick of the probabilistic cellular automaton.
+ * Executes a single discrete time tick of the probabilistic cellular automaton on the 30x30 grid.
  *
  * Implements the multiplicative fire spread formula:
  *   p_burn = p_base * (1 + p_veg) * (1 + p_density) * p_wind * p_slope
  *            * humidityFactor * distanceWeight * towerMitigation
  *
- * Based on:
- *   - Alexandridis et al. (2008) CA model (Spetses Island 1990)
- *   - Almeida & Macau (2001/2011) stochastic 3-state cellular automata
- *   - Cell2Fire (Pais et al., arXiv:1905.09317)
+ * Special rule for water proximity:
+ *   Water, roads, firebreaks, and wet shorelines/sand (WET_GROUND) NEVER ignite (p_burn = 0).
  */
 export function simulationStep(
   grid: SimulationGrid,
@@ -39,7 +37,6 @@ export function simulationStep(
 
   // Precompute wind unit vector (0 deg = North blowing, 90 deg = East blowing)
   const windAngleRad = ((env.windDirectionDeg - 90) * Math.PI) / 180;
-  // Normalized direction vector of where wind blows
   const windDirX = Math.cos(windAngleRad);
   const windDirY = Math.sin(windAngleRad);
   const windSpeed = Math.max(0, env.windSpeed);
@@ -48,7 +45,6 @@ export function simulationStep(
   const normHumidity = Math.max(0, Math.min(100, env.humidity)) / 100;
   const humidityFactor = Math.max(0.01, 1.0 - Math.pow(normHumidity, 1.6) * 0.98);
 
-  // Precompute watchtower coverage grid lookup or bounding check
   const hasTowers = watchTowers.length > 0;
 
   // 1. First pass: Handle burning duration of currently burning cells
@@ -75,12 +71,13 @@ export function simulationStep(
       const cellTerrain = terrain[idx];
       const p_veg = config.p_veg[cellTerrain as TerrainType] ?? -1.0;
 
-      // Water, roads, and firebreaks have negative flammability and NEVER ignite
+      // Water, roads, firebreaks, and wet shorelines NEVER ignite
       if (
         p_veg < 0 ||
         cellTerrain === TerrainType.WATER ||
         cellTerrain === TerrainType.ROAD ||
-        cellTerrain === TerrainType.FIREBREAK
+        cellTerrain === TerrainType.FIREBREAK ||
+        cellTerrain === TerrainType.WET_GROUND
       ) {
         continue;
       }
@@ -101,7 +98,7 @@ export function simulationStep(
         }
       }
 
-      // Check all 8 neighbors: if neighbor is BURNING in the current state, compute ignition chance
+      // Check all 8 neighbors: if neighbor is BURNING, compute ignition chance
       for (let n = 0; n < 8; n++) {
         const neighbor = NEIGHBORS[n];
         const nx = x + neighbor.dx;
@@ -112,29 +109,22 @@ export function simulationStep(
         }
 
         const nIdx = ny * width + nx;
-        // Burning neighbor attempting to ignite this cell (dx, dy from neighbor to cell: -neighbor.dx, -neighbor.dy)
         if (state[nIdx] === CellState.BURNING) {
-          // Direction vector from burning neighbor to current unburned cell
           const spreadDx = -neighbor.dx;
           const spreadDy = -neighbor.dy;
           const dist = neighbor.dist;
 
-          // Cosine of angle between wind direction vector and spread direction vector
-          // dot product: (spreadDx * windDirX + spreadDy * windDirY) / dist
+          // Cosine of angle between wind direction and fire spread vector
           const cosTheta = (spreadDx * windDirX + spreadDy * windDirY) / dist;
 
-          // Wind factor pw: exponential in wind speed and directional alignment (Alexandridis et al. 2008)
-          // Downwind (cosTheta = 1) -> pw = exp(c1 * V)
-          // Upwind (cosTheta = -1) -> pw = exp(c1 * V) * exp(-2 * c2 * V)
           const p_wind =
             windSpeed === 0
               ? 1.0
               : Math.exp(config.c1 * windSpeed) *
                 Math.exp(config.c2 * windSpeed * (cosTheta - 1.0));
 
-          // Slope factor ps: depends on elevation difference (uphill spread faster)
           const neighborElev = elevation[nIdx];
-          const elevationDiff = cellElev - neighborElev; // positive if fire spreading uphill
+          const elevationDiff = cellElev - neighborElev;
           const slope = elevationDiff / dist;
           const p_slope = Math.max(0.1, Math.min(3.0, Math.exp(config.a_slope * slope)));
 
@@ -149,14 +139,12 @@ export function simulationStep(
             neighbor.weight *
             towerMitigation;
 
-          // Clamp probability within [0, 1]
           p_burn = Math.max(0.0, Math.min(1.0, p_burn));
 
-          // Stochastic trial using seeded PRNG
           if (rng() < p_burn) {
             nextState[idx] = CellState.BURNING;
             burnTicks[idx] = 0;
-            break; // Cell is ignited, no need to check other neighbors this tick
+            break; // Cell ignited
           }
         }
       }

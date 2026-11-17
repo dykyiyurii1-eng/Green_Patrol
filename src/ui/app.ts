@@ -37,11 +37,19 @@ export class App {
   private isRunning: boolean = false;
   private speedMultiplier: number = 1;
   private ticksElapsed: number = 0;
-  private maxSimulationTicks: number = 300;
+  private maxSimulationTicks: number = 250;
   private initialForestCount: number = 0;
+  private initialHousesCount: number = 0;
 
   private isMouseDown: boolean = false;
   private lastDrawnCell: { x: number; y: number } | null = null;
+
+  // Intro Elements
+  private introOverlay!: HTMLElement;
+  private introLine1El!: HTMLElement;
+  private introLine2El!: HTMLElement;
+  private skipIntroBtn!: HTMLButtonElement;
+  private isIntroFinished: boolean = false;
 
   // DOM Elements
   private modePlanningBtn!: HTMLButtonElement;
@@ -53,6 +61,7 @@ export class App {
   private planningPanel!: HTMLElement;
   private budgetBarEl!: HTMLElement;
   private budgetTextEl!: HTMLElement;
+  private planningErrorEl!: HTMLElement;
   private toolFirebreakBtn!: HTMLButtonElement;
   private toolWatchtowerBtn!: HTMLButtonElement;
   private undoBtn!: HTMLButtonElement;
@@ -83,13 +92,14 @@ export class App {
   private speed5Btn!: HTMLButtonElement;
   private stepBtn!: HTMLButtonElement;
 
+  private statVillageEl!: HTMLElement;
   private statSavedEl!: HTMLElement;
   private statBurningEl!: HTMLElement;
   private statBurnedEl!: HTMLElement;
-  private statTicksEl!: HTMLElement;
 
   // Results Modal
   private resultsModal!: HTMLElement;
+  private resultVillageEl!: HTMLElement;
   private resultSavedEl!: HTMLElement;
   private resultBaselineEl!: HTMLElement;
   private resultDiffEl!: HTMLElement;
@@ -106,11 +116,15 @@ export class App {
     this.rng = createMulberry32(this.seed);
     this.env = { ...this.currentScenario.env };
 
-    this.grid = new SimulationGrid(100, 100);
-    this.cleanGrid = new SimulationGrid(100, 100);
+    // 30x30 tactical grid
+    this.grid = new SimulationGrid(30, 30);
+    this.cleanGrid = new SimulationGrid(30, 30);
     this.currentScenario.init(this.cleanGrid);
     this.grid = this.cleanGrid.clone();
-    this.initialForestCount = this.cleanGrid.countTerrain(TerrainType.FOREST);
+    this.initialForestCount =
+      this.cleanGrid.countTerrain(TerrainType.FOREST) +
+      this.cleanGrid.countTerrain(TerrainType.BUSHES);
+    this.initialHousesCount = this.cleanGrid.countHouses();
 
     this.planningManager = new PlanningManager(this.grid, this.currentScenario.budget);
 
@@ -119,11 +133,20 @@ export class App {
     this.computeBaseline();
     this.updateUIState();
 
-    // Start animation render loop
+    // Start intro sequence
+    this.playCinematicIntro();
+
+    // Start render loop
     this.startRenderLoop();
   }
 
   private initDOMElements(): void {
+    // Intro
+    this.introOverlay = document.getElementById('intro-overlay') as HTMLElement;
+    this.introLine1El = document.getElementById('intro-line-1') as HTMLElement;
+    this.introLine2El = document.getElementById('intro-line-2') as HTMLElement;
+    this.skipIntroBtn = document.getElementById('skip-intro-btn') as HTMLButtonElement;
+
     this.modePlanningBtn = document.getElementById('mode-planning-btn') as HTMLButtonElement;
     this.modeSandboxBtn = document.getElementById('mode-sandbox-btn') as HTMLButtonElement;
     this.scenarioSelect = document.getElementById('scenario-select') as HTMLSelectElement;
@@ -133,6 +156,7 @@ export class App {
     this.planningPanel = document.getElementById('planning-panel') as HTMLElement;
     this.budgetBarEl = document.getElementById('budget-progress') as HTMLElement;
     this.budgetTextEl = document.getElementById('budget-text') as HTMLElement;
+    this.planningErrorEl = document.getElementById('planning-error-msg') as HTMLElement;
     this.toolFirebreakBtn = document.getElementById('tool-firebreak-btn') as HTMLButtonElement;
     this.toolWatchtowerBtn = document.getElementById('tool-watchtower-btn') as HTMLButtonElement;
     this.undoBtn = document.getElementById('undo-btn') as HTMLButtonElement;
@@ -167,13 +191,14 @@ export class App {
     this.stepBtn = document.getElementById('step-btn') as HTMLButtonElement;
 
     // Stats
+    this.statVillageEl = document.getElementById('stat-village') as HTMLElement;
     this.statSavedEl = document.getElementById('stat-saved') as HTMLElement;
     this.statBurningEl = document.getElementById('stat-burning') as HTMLElement;
     this.statBurnedEl = document.getElementById('stat-burned') as HTMLElement;
-    this.statTicksEl = document.getElementById('stat-ticks') as HTMLElement;
 
     // Results modal
     this.resultsModal = document.getElementById('results-modal') as HTMLElement;
+    this.resultVillageEl = document.getElementById('result-village-val') as HTMLElement;
     this.resultSavedEl = document.getElementById('result-saved-val') as HTMLElement;
     this.resultBaselineEl = document.getElementById('result-baseline-val') as HTMLElement;
     this.resultDiffEl = document.getElementById('result-diff-val') as HTMLElement;
@@ -182,7 +207,64 @@ export class App {
     this.retryBtn = document.getElementById('retry-btn') as HTMLButtonElement;
   }
 
+  private playCinematicIntro(): void {
+    const text1 = 'Ти — фермер...';
+    const text2 = 'Не дай своєму селищу згоріти!';
+
+    let charIdx = 0;
+    this.introLine1El.classList.add('cursor-blink');
+
+    const typeLine1 = () => {
+      if (this.isIntroFinished) return;
+      if (charIdx < text1.length) {
+        this.introLine1El.textContent = text1.slice(0, charIdx + 1);
+        charIdx++;
+        setTimeout(typeLine1, 65);
+      } else {
+        this.introLine1El.classList.remove('cursor-blink');
+        setTimeout(() => {
+          charIdx = 0;
+          this.introLine2El.classList.add('cursor-blink');
+          typeLine2();
+        }, 500);
+      }
+    };
+
+    const typeLine2 = () => {
+      if (this.isIntroFinished) return;
+      if (charIdx < text2.length) {
+        this.introLine2El.textContent = text2.slice(0, charIdx + 1);
+        charIdx++;
+        setTimeout(typeLine2, 65);
+      } else {
+        setTimeout(() => {
+          this.finishIntro();
+        }, 1200);
+      }
+    };
+
+    setTimeout(typeLine1, 300);
+  }
+
+  private finishIntro(): void {
+    if (this.isIntroFinished) return;
+    this.isIntroFinished = true;
+    this.introOverlay.classList.add('fade-out');
+    setTimeout(() => {
+      this.introOverlay.classList.add('hidden');
+    }, 1500);
+  }
+
   private bindEvents(): void {
+    // Skip intro button & click
+    this.skipIntroBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.finishIntro();
+    });
+    this.introOverlay.addEventListener('click', () => {
+      this.finishIntro();
+    });
+
     // Mode Switching
     this.modePlanningBtn.addEventListener('click', () => this.switchMode('planning'));
     this.modeSandboxBtn.addEventListener('click', () => this.switchMode('sandbox'));
@@ -202,12 +284,14 @@ export class App {
     this.undoBtn.addEventListener('click', () => {
       if (this.planningPhase === 'prepare') {
         this.planningManager.undo();
+        this.planningErrorEl.classList.add('hidden');
         this.updateUIState();
       }
     });
     this.resetPlanBtn.addEventListener('click', () => {
       if (this.planningPhase === 'prepare') {
         this.planningManager.reset(this.cleanGrid);
+        this.planningErrorEl.classList.add('hidden');
         this.updateUIState();
       }
     });
@@ -315,7 +399,6 @@ export class App {
       return;
     }
 
-    // Debounce to prevent repeatedly triggering on the exact same cell while dragging
     if (this.lastDrawnCell && this.lastDrawnCell.x === cellX && this.lastDrawnCell.y === cellY) {
       return;
     }
@@ -323,14 +406,23 @@ export class App {
 
     if (this.currentMode === 'planning') {
       if (this.planningPhase !== 'prepare') {
-        return; // No building during fire or results
+        return;
       }
 
+      let success = false;
       if (this.activeTool === 'firebreak') {
-        this.planningManager.placeFirebreak(cellX, cellY);
+        success = this.planningManager.placeFirebreak(cellX, cellY);
       } else if (this.activeTool === 'watchtower') {
-        this.planningManager.placeWatchTower(cellX, cellY);
+        success = this.planningManager.placeWatchTower(cellX, cellY);
       }
+
+      if (!success && this.planningManager.lastErrorMessage) {
+        this.planningErrorEl.textContent = `⚠️ ${this.planningManager.lastErrorMessage}`;
+        this.planningErrorEl.classList.remove('hidden');
+      } else {
+        this.planningErrorEl.classList.add('hidden');
+      }
+
       this.updateUIState();
     } else {
       // Sandbox mode
@@ -339,7 +431,9 @@ export class App {
         case 'ignite':
           if (
             this.grid.terrain[idx] === TerrainType.FOREST ||
-            this.grid.terrain[idx] === TerrainType.GRASS
+            this.grid.terrain[idx] === TerrainType.GRASS ||
+            this.grid.terrain[idx] === TerrainType.BUSHES ||
+            this.grid.terrain[idx] === TerrainType.HOUSES
           ) {
             this.grid.state[idx] = CellState.BURNING;
             this.grid.burnTicks[idx] = 0;
@@ -356,6 +450,7 @@ export class App {
         case 'water':
           this.grid.terrain[idx] = TerrainType.WATER;
           this.grid.state[idx] = CellState.UNBURNED;
+          this.grid.generateWetShorelines();
           break;
       }
       this.updateUIState();
@@ -394,11 +489,9 @@ export class App {
   }
 
   private updateToolButtons(): void {
-    // Planning buttons
     this.toolFirebreakBtn.classList.toggle('active', this.activeTool === 'firebreak');
     this.toolWatchtowerBtn.classList.toggle('active', this.activeTool === 'watchtower');
 
-    // Sandbox buttons
     this.toolIgniteBtn.classList.toggle('active', this.activeTool === 'ignite');
     this.toolSandboxFirebreakBtn.classList.toggle('active', this.activeTool === 'firebreak');
     this.toolForestBtn.classList.toggle('active', this.activeTool === 'forest');
@@ -412,9 +505,12 @@ export class App {
 
     this.scenarioDescEl.textContent = scenario.description;
 
-    this.cleanGrid = new SimulationGrid(100, 100);
+    this.cleanGrid = new SimulationGrid(30, 30);
     scenario.init(this.cleanGrid);
-    this.initialForestCount = this.cleanGrid.countTerrain(TerrainType.FOREST);
+    this.initialForestCount =
+      this.cleanGrid.countTerrain(TerrainType.FOREST) +
+      this.cleanGrid.countTerrain(TerrainType.BUSHES);
+    this.initialHousesCount = this.cleanGrid.countHouses();
 
     this.computeBaseline();
 
@@ -424,7 +520,6 @@ export class App {
       this.resetSandbox();
     }
 
-    // Sync sandbox sliders
     this.windSpeedSlider.value = this.env.windSpeed.toString();
     this.windSpeedVal.textContent = `${this.env.windSpeed.toFixed(1)} м/с`;
     this.windDirSlider.value = this.env.windDirectionDeg.toString();
@@ -437,7 +532,6 @@ export class App {
   }
 
   private computeBaseline(): void {
-    // Run objective baseline on unmodified scenario
     this.baselineResult = runBaselineSimulation(
       this.cleanGrid,
       this.currentScenario.env,
@@ -455,6 +549,7 @@ export class App {
     this.planningManager = new PlanningManager(this.grid, this.currentScenario.budget);
     this.simControlsPanel.classList.add('hidden');
     this.startFireBtn.classList.remove('hidden');
+    this.planningErrorEl.classList.add('hidden');
     this.resultsModal.classList.add('hidden');
     this.updateUIState();
   }
@@ -463,9 +558,10 @@ export class App {
     this.planningPhase = 'fire';
     this.isRunning = true;
     this.ticksElapsed = 0;
-    this.rng = createMulberry32(this.seed); // Fresh seed for identical stochastic conditions
+    this.rng = createMulberry32(this.seed);
     this.simControlsPanel.classList.remove('hidden');
     this.startFireBtn.classList.add('hidden');
+    this.planningErrorEl.classList.add('hidden');
     this.updateUIState();
   }
 
@@ -531,11 +627,19 @@ export class App {
     const baselineSaved = this.baselineResult ? this.baselineResult.savedPercent : 0;
     const diff = savedPercent - baselineSaved;
 
+    const unburnedHouses = this.grid.countUnburnedHouses();
+    const totalHouses = this.initialHousesCount;
+    const housesPercent = totalHouses > 0 ? (unburnedHouses / totalHouses) * 100 : 100;
+
+    this.resultVillageEl.textContent = `${unburnedHouses} / ${totalHouses} (${housesPercent.toFixed(0)}% вціліло)`;
+    this.resultVillageEl.className =
+      housesPercent === 100 ? 'metric-val positive' : 'metric-val negative';
+
     this.resultSavedEl.textContent = `${savedPercent.toFixed(1)}%`;
     this.resultBaselineEl.textContent = `${baselineSaved.toFixed(1)}%`;
 
     if (diff >= 0) {
-      this.resultDiffEl.textContent = `+${diff.toFixed(1)}% (Покращення)`;
+      this.resultDiffEl.textContent = `+${diff.toFixed(1)}% (Краще за бездіяльність)`;
       this.resultDiffEl.className = 'metric-val positive';
     } else {
       this.resultDiffEl.textContent = `${diff.toFixed(1)}%`;
@@ -544,20 +648,20 @@ export class App {
 
     this.resultBudgetEl.textContent = `${this.planningManager.budgetUsed} / ${this.currentScenario.budget.totalBudget} балів`;
 
-    // Rule-based feedback in Ukrainian
+    // Ukrainian feedback tailored to farmer's mission
     let feedback = '';
-    if (savedPercent >= 85) {
+    if (housesPercent === 100 && savedPercent >= 75) {
       feedback =
-        '🌟 Відмінна стратегія! Ви побудували надійні протипожежні розриви та грамотно врахували напрямок вітру. Завдяки вашим діям вдалося зберегти заповідний лісовий фонд!';
-    } else if (savedPercent >= 65) {
+        '🏆 Тріумф фермера! Ваше селище повністю вціліло, а захисні смуги та вежі вберегли також більшу частину лісу. Мешканці селища у безпеці!';
+    } else if (housesPercent === 100) {
       feedback =
-        '👍 Хороший результат! Більшу частину лісу врятовано. Проте полум’я частково просочилося крізь фланги. Спробуйте ширше перекривати коридори поширення за вітром.';
-    } else if (diff > 5) {
+        '🏡 Головна мета досягнута! Всі хатинки селища врятовано від нищівного вогню. Ліс довкола частково постраждав, але селище стоїть!';
+    } else if (housesPercent >= 50) {
       feedback =
-        '⚠️ Вогонь пройшов значну територію, хоча ваша лінія оборони дещо сповільнила його порівняно з повною бездіяльністю. Зверніть увагу на підвітряний сектор та захистіть ключові ділянки заздалегідь.';
+        '⚠️ Вогонь дістався околиць селища! Частину хатинок вдалося відстояти, але полум’я прорвало фланги. Спробуйте створити глибший периметр оборони або встановити вежу ближче до житла.';
     } else {
       feedback =
-        '🔥 Пожежа подолала захисні смуги через високу швидкість вітру та сухість повітря. Спробуйте створити подвійні мінералізовані смуги поперек вітрового потоку та розмістити дозорні вежі.';
+        '🔥 Трагедія для селища! Вогонь знищив більшість будівель. Сухі чагарники та вітер швидко донесли полум’я. Обов’язково використовуйте річку з мокрими берегами та не давайте вогню коридорів!';
     }
 
     this.resultFeedbackEl.textContent = feedback;
@@ -586,13 +690,17 @@ export class App {
     }
 
     // Statistics
+    const unburnedHouses = this.grid.countUnburnedHouses();
+    const totalHouses = this.initialHousesCount;
+    const housesPct = totalHouses > 0 ? (unburnedHouses / totalHouses) * 100 : 100;
+    this.statVillageEl.textContent = `${unburnedHouses} / ${totalHouses} (${housesPct.toFixed(0)}%)`;
+
     const unburnedForest = this.grid.countUnburnedForest();
     const savedPct =
       this.initialForestCount > 0 ? (unburnedForest / this.initialForestCount) * 100 : 100;
     this.statSavedEl.textContent = `${savedPct.toFixed(1)}%`;
     this.statBurningEl.textContent = this.grid.countBurning().toString();
     this.statBurnedEl.textContent = this.grid.countBurned().toString();
-    this.statTicksEl.textContent = this.ticksElapsed.toString();
   }
 
   private startRenderLoop(): void {
@@ -600,8 +708,7 @@ export class App {
 
     const loop = (currentTime: number) => {
       if (this.isRunning) {
-        // Step according to playback speed
-        const interval = 120 / this.speedMultiplier;
+        const interval = 160 / this.speedMultiplier;
         if (currentTime - lastTickTime >= interval) {
           this.performSimulationTick();
           this.updateUIState();
@@ -609,7 +716,8 @@ export class App {
         }
       }
 
-      this.renderer.render(this.grid);
+      const showDanger = this.currentMode === 'planning' && this.planningPhase === 'prepare';
+      this.renderer.render(this.grid, showDanger);
       requestAnimationFrame(loop);
     };
 

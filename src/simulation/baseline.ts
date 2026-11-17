@@ -9,13 +9,16 @@ export interface BaselineResult {
   unburnedForest: number;
   burnedForest: number;
   savedPercent: number;
+  initialHouses: number;
+  unburnedHouses: number;
+  housesSavedPercent: number;
   ticks: number;
 }
 
 /**
  * Runs a deterministic simulation from the unmodified scenario grid (without any player actions)
  * using the exact same random seed and environment.
- * Provides the objective benchmark ("saved vs. baseline") to measure player efficacy.
+ * Provides the objective benchmark to measure player strategy and village defense.
  */
 export function runBaselineSimulation(
   cleanGrid: SimulationGrid,
@@ -27,7 +30,8 @@ export function runBaselineSimulation(
   const sim = cleanGrid.clone();
   const rng = createMulberry32(seed);
 
-  const initialForest = sim.countTerrain(TerrainType.FOREST);
+  const initialForest = sim.countTerrain(TerrainType.FOREST) + sim.countTerrain(TerrainType.BUSHES);
+  const initialHouses = sim.countHouses();
 
   let ticks = 0;
   while (ticks < maxTicks && sim.countBurning() > 0) {
@@ -39,11 +43,17 @@ export function runBaselineSimulation(
   const burnedForest = initialForest - unburnedForest;
   const savedPercent = initialForest > 0 ? (unburnedForest / initialForest) * 100 : 100;
 
+  const unburnedHouses = sim.countUnburnedHouses();
+  const housesSavedPercent = initialHouses > 0 ? (unburnedHouses / initialHouses) * 100 : 100;
+
   return {
     initialForest,
     unburnedForest,
     burnedForest,
     savedPercent,
+    initialHouses,
+    unburnedHouses,
+    housesSavedPercent,
     ticks,
   };
 }

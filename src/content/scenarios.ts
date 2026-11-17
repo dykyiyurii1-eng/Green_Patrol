@@ -18,31 +18,40 @@ export interface ScenarioDefinition {
 
 export const SCENARIOS: ScenarioDefinition[] = [
   {
-    id: 'pine-forest',
-    name: 'Сосновий бір',
+    id: 'river-village',
+    name: 'Рідне селище та річковий бір',
     description:
-      'Рівнинний густий сосновий масив із річкою та дорогою. Помірний західний вітер штовхає полум’я на схід. Завдання: локалізувати пожежу до того, як вона перекинеться на заповідні ділянки.',
+      'На заході у лісовому масиві спалахнула пожежа. Помірний вітер жене вогонь через сухі кущі прямо до селища фермера на сході. Використайте річку з вологими берегами як природний бар’єр та створіть просіки, щоб захистити хатинки!',
     env: {
-      windSpeed: 6.0,
-      windDirectionDeg: 90, // Вітер дує на Схід
-      humidity: 42,
+      windSpeed: 6.5,
+      windDirectionDeg: 90, // Вітер дує на Схід у бік селища
+      humidity: 38,
     },
     seed: 104729,
     budget: {
-      totalBudget: 120,
+      totalBudget: 50,
       firebreakCostPerCell: 2,
-      watchTowerCost: 20,
+      watchTowerCost: 18,
     },
     init: (grid: SimulationGrid) => {
       const { width, height } = grid;
 
-      // За замовчуванням вся територія - ліс
+      // Базовий ландшафт: ліс та трава
       grid.terrain.fill(TerrainType.FOREST);
 
-      // Природна річка, що звивається біля x = 65..70
+      // Галявини та кущі на заході
       for (let y = 0; y < height; y++) {
-        const riverX = Math.round(65 + Math.sin(y / 8) * 3 + Math.cos(y / 15) * 2);
-        for (let dx = -1; dx <= 1; dx++) {
+        for (let x = 0; x < 15; x++) {
+          if ((x + y * 2) % 5 === 0) {
+            grid.terrain[grid.getIndex(x, y)] = TerrainType.BUSHES;
+          }
+        }
+      }
+
+      // Природна звивиста річка посередині карти (x ~ 16..18)
+      for (let y = 0; y < height; y++) {
+        const riverX = Math.round(17 + Math.sin(y / 3) * 2);
+        for (let dx = 0; dx <= 1; dx++) {
           const rx = riverX + dx;
           if (grid.inBounds(rx, y)) {
             grid.terrain[grid.getIndex(rx, y)] = TerrainType.WATER;
@@ -50,125 +59,178 @@ export const SCENARIOS: ScenarioDefinition[] = [
         }
       }
 
-      // Горизонтальна грунтова дорога на y = 50
+      // Дорога через міст
       for (let x = 0; x < width; x++) {
-        grid.terrain[grid.getIndex(x, 50)] = TerrainType.ROAD;
+        grid.terrain[grid.getIndex(x, 15)] = TerrainType.ROAD;
       }
 
-      // Галявини з травою навколо
-      for (let y = 10; y < 30; y++) {
-        for (let x = 10; x < 25; x++) {
-          if ((x - 17) ** 2 + (y - 20) ** 2 < 36) {
-            grid.terrain[grid.getIndex(x, y)] = TerrainType.GRASS;
+      // Селище фермера на сході (x = 22..27, y = 8..22)
+      const villageCoords = [
+        { x: 23, y: 10 },
+        { x: 25, y: 10 },
+        { x: 27, y: 11 },
+        { x: 23, y: 13 },
+        { x: 26, y: 14 },
+        { x: 22, y: 17 },
+        { x: 25, y: 18 },
+        { x: 27, y: 19 },
+        { x: 24, y: 21 },
+        { x: 26, y: 22 },
+      ];
+      for (const pt of villageCoords) {
+        if (grid.inBounds(pt.x, pt.y)) {
+          grid.terrain[grid.getIndex(pt.x, pt.y)] = TerrainType.HOUSES;
+        }
+      }
+
+      // Навколо селища — пасовища та городи (трава)
+      for (let y = 8; y <= 24; y++) {
+        for (let x = 21; x <= 28; x++) {
+          const idx = grid.getIndex(x, y);
+          if (grid.terrain[idx] !== TerrainType.HOUSES && grid.terrain[idx] !== TerrainType.ROAD) {
+            grid.terrain[idx] = TerrainType.GRASS;
           }
         }
       }
 
-      // Початкове вогнище загоряння
-      grid.state[grid.getIndex(20, 40)] = CellState.BURNING;
-      grid.state[grid.getIndex(21, 40)] = CellState.BURNING;
-      grid.state[grid.getIndex(20, 41)] = CellState.BURNING;
+      // Вологі береги біля річки (не горить!)
+      grid.generateWetShorelines();
+
+      // Осередок пожежі на далекому заході
+      grid.state[grid.getIndex(3, 14)] = CellState.BURNING;
+      grid.state[grid.getIndex(3, 15)] = CellState.BURNING;
     },
   },
   {
-    id: 'steppe-wind',
-    name: 'Степовий вітер',
+    id: 'dry-steppe-farm',
+    name: 'Сухий степовий хутір',
     description:
-      'Сухий степовий ландшафт із низькою вологістю та сильним поривчастим південно-східним вітром. Вогонь поширюється з високою швидкістю сухою травою до лісосмуг.',
+      'Екстремальна літня сухість. Сильний південно-східний вітер підхопив вогонь у сухостої та чагарниках. Створіть міцне захисне півколо навколо будівель хутора до того, як вогонь перекриє шлях!',
     env: {
-      windSpeed: 12.0,
-      windDirectionDeg: 135, // Вітер дує на Південний Схід
-      humidity: 18,
+      windSpeed: 10.0,
+      windDirectionDeg: 135, // Вітер на Південний Схід
+      humidity: 16,
     },
     seed: 582199,
     budget: {
-      totalBudget: 140,
+      totalBudget: 60,
       firebreakCostPerCell: 2,
-      watchTowerCost: 20,
+      watchTowerCost: 18,
     },
     init: (grid: SimulationGrid) => {
       const { width, height } = grid;
 
-      // Мозаїчний ландшафт: суха трава та масиви лісу
+      // Сухий степ: переважно трава та сухі кущі
       grid.terrain.fill(TerrainType.GRASS);
 
-      // Острівці лісу та лісопосадки
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
-          const inForest1 = (x - 45) ** 2 + (y - 45) ** 2 < 200;
-          const inForest2 = (x - 70) ** 2 + (y - 70) ** 2 < 320;
-          const inForestBelt = y % 25 >= 10 && y % 25 <= 14 && x > 20;
-
-          if (inForest1 || inForest2 || inForestBelt) {
+          if ((x * 3 + y * 7) % 7 === 0 || (x + y) % 6 === 0) {
+            grid.terrain[grid.getIndex(x, y)] = TerrainType.BUSHES;
+          } else if ((x - 10) ** 2 + (y - 12) ** 2 < 12) {
             grid.terrain[grid.getIndex(x, y)] = TerrainType.FOREST;
           }
         }
       }
 
-      // Невеликий ставок біля центру
-      for (let y = 35; y < 45; y++) {
-        for (let x = 55; x < 65; x++) {
-          if ((x - 60) ** 2 + (y - 40) ** 2 < 16) {
+      // Невеликий ставок біля центру (із зволоженим берегом)
+      for (let y = 10; y <= 13; y++) {
+        for (let x = 11; x <= 14; x++) {
+          if ((x - 12.5) ** 2 + (y - 11.5) ** 2 < 3) {
             grid.terrain[grid.getIndex(x, y)] = TerrainType.WATER;
           }
         }
       }
 
+      // Хутір на південному сході (x = 20..27, y = 20..27)
+      const houses = [
+        { x: 22, y: 21 },
+        { x: 24, y: 21 },
+        { x: 26, y: 22 },
+        { x: 21, y: 24 },
+        { x: 23, y: 25 },
+        { x: 26, y: 25 },
+        { x: 24, y: 27 },
+        { x: 27, y: 27 },
+      ];
+      for (const h of houses) {
+        if (grid.inBounds(h.x, h.y)) {
+          grid.terrain[grid.getIndex(h.x, h.y)] = TerrainType.HOUSES;
+        }
+      }
+
+      grid.generateWetShorelines();
+
       // Осередок пожежі на північному заході
-      grid.state[grid.getIndex(15, 15)] = CellState.BURNING;
-      grid.state[grid.getIndex(16, 15)] = CellState.BURNING;
-      grid.state[grid.getIndex(15, 16)] = CellState.BURNING;
+      grid.state[grid.getIndex(4, 4)] = CellState.BURNING;
+      grid.state[grid.getIndex(5, 4)] = CellState.BURNING;
     },
   },
   {
-    id: 'black-forest-hills',
-    name: 'Пагорби Чорного лісу',
+    id: 'hill-farmstead',
+    name: 'Пагорб із садибою та вітряком',
     description:
-      'Рельєфна місцевість із великим пагорбом у центрі. Демонстрація впливу рельєфу (slope factor): полум’я стрімко підіймається вгору схилом, але сповільнюється на спаді.',
+      'Садиба фермера розташована на вершині пагорба. Вогонь рухається з підніжжя. Оскільки полум’я підіймається вгору значно швидше за рахунок теплового схилу, звичайна лінія не втримає натиск — встановіть водонапірну вежу та просіки!',
     env: {
       windSpeed: 5.0,
-      windDirectionDeg: 0, // Вітер дує на Північ
-      humidity: 40,
+      windDirectionDeg: 0, // Вітер дує на Північ (прямо на вершину)
+      humidity: 35,
     },
     seed: 902831,
     budget: {
-      totalBudget: 130,
+      totalBudget: 54,
       firebreakCostPerCell: 2,
-      watchTowerCost: 20,
+      watchTowerCost: 18,
     },
     init: (grid: SimulationGrid) => {
       const { width, height } = grid;
 
       grid.terrain.fill(TerrainType.FOREST);
 
-      // Генерація пагорба з піком у центрі (50, 50), висота до 60 метрів
-      const centerX = 50;
-      const centerY = 50;
-      const radius = 35;
-
+      // Пагорб у центрі (15, 14), висота 50м
+      const cx = 15;
+      const cy = 13;
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
-          const distSq = (x - centerX) ** 2 + (y - centerY) ** 2;
-          if (distSq < radius ** 2) {
-            const h = 60 * Math.exp(-distSq / (2 * 12 ** 2));
-            grid.elevation[grid.getIndex(x, y)] = h;
+          const distSq = (x - cx) ** 2 + (y - cy) ** 2;
+          if (distSq < 14 ** 2) {
+            grid.elevation[grid.getIndex(x, y)] = 50 * Math.exp(-distSq / (2 * 5 ** 2));
+          }
+          if ((x * 2 + y * 5) % 8 === 0) {
+            grid.terrain[grid.getIndex(x, y)] = TerrainType.BUSHES;
           }
         }
       }
 
-      // Невелика водойма біля підніжжя
-      for (let y = 15; y < 25; y++) {
-        for (let x = 15; x < 25; x++) {
-          if ((x - 20) ** 2 + (y - 20) ** 2 < 14) {
+      // Ставок біля підніжжя
+      for (let y = 22; y <= 25; y++) {
+        for (let x = 6; x <= 9; x++) {
+          if ((x - 7.5) ** 2 + (y - 23.5) ** 2 < 3) {
             grid.terrain[grid.getIndex(x, y)] = TerrainType.WATER;
           }
         }
       }
 
-      // Осередок загоряння біля південного підніжжя пагорба
-      grid.state[grid.getIndex(50, 75)] = CellState.BURNING;
-      grid.state[grid.getIndex(51, 75)] = CellState.BURNING;
-      grid.state[grid.getIndex(50, 76)] = CellState.BURNING;
+      // Садиба на вершині пагорба
+      const farmHouses = [
+        { x: 14, y: 12 },
+        { x: 16, y: 12 },
+        { x: 14, y: 14 },
+        { x: 16, y: 14 },
+        { x: 15, y: 15 },
+        { x: 15, y: 11 },
+      ];
+      for (const f of farmHouses) {
+        if (grid.inBounds(f.x, f.y)) {
+          grid.terrain[grid.getIndex(f.x, f.y)] = TerrainType.HOUSES;
+        }
+      }
+
+      grid.generateWetShorelines();
+
+      // Осередок на південному підніжжі пагорба
+      grid.state[grid.getIndex(15, 25)] = CellState.BURNING;
+      grid.state[grid.getIndex(16, 25)] = CellState.BURNING;
     },
   },
 ];

@@ -1,6 +1,6 @@
 import { SimulationGrid } from './grid';
 import { TerrainType, WatchTower, PlanningBudgetConfig } from './types';
-import { DEFAULT_WATCH_TOWER_CONFIG } from './config';
+import { DEFAULT_WATCH_TOWER_CONFIG, DEFAULT_SIMULATION_CONFIG } from './config';
 
 export interface PlayerAction {
   type: 'firebreak' | 'watchtower';
@@ -15,6 +15,7 @@ export class PlanningManager {
   readonly budgetConfig: PlanningBudgetConfig;
   readonly actions: PlayerAction[];
   budgetUsed: number;
+  lastErrorMessage: string = '';
 
   constructor(grid: SimulationGrid, budgetConfig: PlanningBudgetConfig) {
     this.grid = grid;
@@ -31,21 +32,40 @@ export class PlanningManager {
     return this.budgetUsed + cost <= this.budgetConfig.totalBudget;
   }
 
-  placeFirebreak(x: number, y: number): boolean {
+  placeFirebreak(
+    x: number,
+    y: number,
+    heatRadius: number = DEFAULT_SIMULATION_CONFIG.heatDangerRadius
+  ): boolean {
     if (!this.grid.inBounds(x, y)) {
+      this.lastErrorMessage = 'Поза межами карти';
       return false;
     }
 
     const idx = this.grid.getIndex(x, y);
     const currentTerrain = this.grid.terrain[idx];
 
-    // Cannot place firebreak on water or if it's already a firebreak
-    if (currentTerrain === TerrainType.WATER || currentTerrain === TerrainType.FIREBREAK) {
+    // Cannot build on water, wet ground, roads or houses
+    if (
+      currentTerrain === TerrainType.WATER ||
+      currentTerrain === TerrainType.WET_GROUND ||
+      currentTerrain === TerrainType.FIREBREAK ||
+      currentTerrain === TerrainType.HOUSES
+    ) {
+      this.lastErrorMessage = 'Тут не можна копати смугу';
+      return false;
+    }
+
+    // Heat & smoke danger zone check: cannot cheese by walling fire at point blank range
+    if (this.grid.isNearActiveFire(x, y, heatRadius)) {
+      this.lastErrorMessage =
+        'Занадто близько до полум’я! Спека та їдкий дим не дозволяють працювати впритул до вогню.';
       return false;
     }
 
     const cost = this.budgetConfig.firebreakCostPerCell;
     if (!this.canAfford(cost)) {
+      this.lastErrorMessage = 'Вичерпано запас часу та ресурсів фермера';
       return false;
     }
 
@@ -59,6 +79,7 @@ export class PlanningManager {
     });
 
     this.grid.terrain[idx] = TerrainType.FIREBREAK;
+    this.lastErrorMessage = '';
     return true;
   }
 
@@ -69,17 +90,30 @@ export class PlanningManager {
     mitigationFactor: number = DEFAULT_WATCH_TOWER_CONFIG.mitigationFactor
   ): boolean {
     if (!this.grid.inBounds(x, y)) {
+      this.lastErrorMessage = 'Поза межами карти';
+      return false;
+    }
+
+    const idx = this.grid.getIndex(x, y);
+    if (this.grid.terrain[idx] === TerrainType.WATER) {
+      this.lastErrorMessage = 'Не можна будувати вежу на воді';
+      return false;
+    }
+
+    if (this.grid.isNearActiveFire(x, y, DEFAULT_SIMULATION_CONFIG.heatDangerRadius)) {
+      this.lastErrorMessage = 'Занадто близько до вогню!';
       return false;
     }
 
     const cost = this.budgetConfig.watchTowerCost;
     if (!this.canAfford(cost)) {
+      this.lastErrorMessage = 'Недостатньо ресурсів для побудови вежі';
       return false;
     }
 
-    // Check if tower already exists at or very near this location
     const alreadyExists = this.grid.watchTowers.some((t) => t.x === x && t.y === y);
     if (alreadyExists) {
+      this.lastErrorMessage = 'Вежа тут уже встановлена';
       return false;
     }
 
@@ -93,6 +127,7 @@ export class PlanningManager {
     });
 
     this.grid.watchTowers.push(tower);
+    this.lastErrorMessage = '';
     return true;
   }
 
@@ -116,6 +151,7 @@ export class PlanningManager {
       }
     }
 
+    this.lastErrorMessage = '';
     return true;
   }
 
@@ -125,5 +161,6 @@ export class PlanningManager {
     this.grid.terrain.set(originalGrid.terrain);
     this.grid.state.set(originalGrid.state);
     this.grid.watchTowers = originalGrid.watchTowers.map((t) => ({ ...t }));
+    this.lastErrorMessage = '';
   }
 }
