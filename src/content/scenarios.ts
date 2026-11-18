@@ -24,7 +24,11 @@ export const SCENARIOS: ScenarioDefinition[] = [
       'На заході у лісовому масиві спалахнула пожежа. Помірний вітер жене вогонь через сухі кущі прямо до селища фермера на сході. Використайте річку з вологими берегами як природний бар’єр та створіть просіки, щоб захистити хатинки!',
     env: {
       windSpeed: 6.5,
+<<<<<<< HEAD
+      windDirectionDeg: 90,
+=======
       windDirectionDeg: 90, // Вітер дує на Схід у бік селища
+>>>>>>> feat/yurii-ui
       humidity: 38,
     },
     seed: 104729,
@@ -36,10 +40,15 @@ export const SCENARIOS: ScenarioDefinition[] = [
     init: (grid: SimulationGrid) => {
       const { width, height } = grid;
 
+<<<<<<< HEAD
+      grid.terrain.fill(TerrainType.FOREST);
+
+=======
       // Базовий ландшафт: ліс та трава
       grid.terrain.fill(TerrainType.FOREST);
 
       // Галявини та кущі на заході
+>>>>>>> feat/yurii-ui
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < 15; x++) {
           if ((x + y * 2) % 5 === 0) {
@@ -48,7 +57,10 @@ export const SCENARIOS: ScenarioDefinition[] = [
         }
       }
 
+<<<<<<< HEAD
+=======
       // Природна звивиста річка посередині карти (x ~ 16..18)
+>>>>>>> feat/yurii-ui
       for (let y = 0; y < height; y++) {
         const riverX = Math.round(17 + Math.sin(y / 3) * 2);
         for (let dx = 0; dx <= 1; dx++) {
@@ -59,12 +71,18 @@ export const SCENARIOS: ScenarioDefinition[] = [
         }
       }
 
+<<<<<<< HEAD
+=======
       // Дорога через міст
+>>>>>>> feat/yurii-ui
       for (let x = 0; x < width; x++) {
         grid.terrain[grid.getIndex(x, 15)] = TerrainType.ROAD;
       }
 
+<<<<<<< HEAD
+=======
       // Селище фермера на сході (x = 22..27, y = 8..22)
+>>>>>>> feat/yurii-ui
       const villageCoords = [
         { x: 23, y: 10 },
         { x: 25, y: 10 },
@@ -83,7 +101,10 @@ export const SCENARIOS: ScenarioDefinition[] = [
         }
       }
 
+<<<<<<< HEAD
+=======
       // Навколо селища — пасовища та городи (трава)
+>>>>>>> feat/yurii-ui
       for (let y = 8; y <= 24; y++) {
         for (let x = 21; x <= 28; x++) {
           const idx = grid.getIndex(x, y);
@@ -93,10 +114,15 @@ export const SCENARIOS: ScenarioDefinition[] = [
         }
       }
 
+<<<<<<< HEAD
+      grid.generateWetShorelines();
+
+=======
       // Вологі береги біля річки (не горить!)
       grid.generateWetShorelines();
 
       // Осередок пожежі на далекому заході
+>>>>>>> feat/yurii-ui
       grid.state[grid.getIndex(3, 14)] = CellState.BURNING;
       grid.state[grid.getIndex(3, 15)] = CellState.BURNING;
     },
@@ -108,7 +134,11 @@ export const SCENARIOS: ScenarioDefinition[] = [
       'Екстремальна літня сухість. Сильний південно-східний вітер підхопив вогонь у сухостої та чагарниках. Створіть міцне захисне півколо навколо будівель хутора до того, як вогонь перекриє шлях!',
     env: {
       windSpeed: 10.0,
+<<<<<<< HEAD
+      windDirectionDeg: 135,
+=======
       windDirectionDeg: 135, // Вітер на Південний Схід
+>>>>>>> feat/yurii-ui
       humidity: 16,
     },
     seed: 582199,
@@ -120,7 +150,10 @@ export const SCENARIOS: ScenarioDefinition[] = [
     init: (grid: SimulationGrid) => {
       const { width, height } = grid;
 
+<<<<<<< HEAD
+=======
       // Сухий степ: переважно трава та сухі кущі
+>>>>>>> feat/yurii-ui
       grid.terrain.fill(TerrainType.GRASS);
 
       for (let y = 0; y < height; y++) {
@@ -133,7 +166,10 @@ export const SCENARIOS: ScenarioDefinition[] = [
         }
       }
 
+<<<<<<< HEAD
+=======
       // Невеликий ставок біля центру (із зволоженим берегом)
+>>>>>>> feat/yurii-ui
       for (let y = 10; y <= 13; y++) {
         for (let x = 11; x <= 14; x++) {
           if ((x - 12.5) ** 2 + (y - 11.5) ** 2 < 3) {
@@ -142,7 +178,10 @@ export const SCENARIOS: ScenarioDefinition[] = [
         }
       }
 
+<<<<<<< HEAD
+=======
       // Хутір на південному сході (x = 20..27, y = 20..27)
+>>>>>>> feat/yurii-ui
       const houses = [
         { x: 22, y: 21 },
         { x: 24, y: 21 },
@@ -161,7 +200,10 @@ export const SCENARIOS: ScenarioDefinition[] = [
 
       grid.generateWetShorelines();
 
+<<<<<<< HEAD
+=======
       // Осередок пожежі на північному заході
+>>>>>>> feat/yurii-ui
       grid.state[grid.getIndex(4, 4)] = CellState.BURNING;
       grid.state[grid.getIndex(5, 4)] = CellState.BURNING;
     },
@@ -173,7 +215,11 @@ export const SCENARIOS: ScenarioDefinition[] = [
       'Садиба фермера розташована на вершині пагорба. Вогонь рухається з підніжжя. Оскільки полум’я підіймається вгору значно швидше за рахунок теплового схилу, звичайна лінія не втримає натиск — встановіть водонапірну вежу та просіки!',
     env: {
       windSpeed: 5.0,
+<<<<<<< HEAD
+      windDirectionDeg: 0,
+=======
       windDirectionDeg: 0, // Вітер дує на Північ (прямо на вершину)
+>>>>>>> feat/yurii-ui
       humidity: 35,
     },
     seed: 902831,
@@ -187,7 +233,10 @@ export const SCENARIOS: ScenarioDefinition[] = [
 
       grid.terrain.fill(TerrainType.FOREST);
 
+<<<<<<< HEAD
+=======
       // Пагорб у центрі (15, 14), висота 50м
+>>>>>>> feat/yurii-ui
       const cx = 15;
       const cy = 13;
       for (let y = 0; y < height; y++) {
@@ -202,7 +251,10 @@ export const SCENARIOS: ScenarioDefinition[] = [
         }
       }
 
+<<<<<<< HEAD
+=======
       // Ставок біля підніжжя
+>>>>>>> feat/yurii-ui
       for (let y = 22; y <= 25; y++) {
         for (let x = 6; x <= 9; x++) {
           if ((x - 7.5) ** 2 + (y - 23.5) ** 2 < 3) {
@@ -211,7 +263,10 @@ export const SCENARIOS: ScenarioDefinition[] = [
         }
       }
 
+<<<<<<< HEAD
+=======
       // Садиба на вершині пагорба
+>>>>>>> feat/yurii-ui
       const farmHouses = [
         { x: 14, y: 12 },
         { x: 16, y: 12 },
@@ -228,7 +283,10 @@ export const SCENARIOS: ScenarioDefinition[] = [
 
       grid.generateWetShorelines();
 
+<<<<<<< HEAD
+=======
       // Осередок на південному підніжжі пагорба
+>>>>>>> feat/yurii-ui
       grid.state[grid.getIndex(15, 25)] = CellState.BURNING;
       grid.state[grid.getIndex(16, 25)] = CellState.BURNING;
     },

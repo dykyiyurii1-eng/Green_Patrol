@@ -1,5 +1,11 @@
 import { SimulationGrid, CellState, TerrainType } from '../simulation';
 
+<<<<<<< HEAD
+const TW = 64;
+const TH = 32;
+const THICK = 9;
+const ELEV = 0.45;
+=======
 // ---------------------------------------------------------------------------
 // Ізометричний рендер «Зеленого патруля».
 // Логіку симуляції не чіпає: читає тільки grid.state / terrain / elevation /
@@ -13,6 +19,7 @@ const TW = 64; // ширина ромба клітинки у світових �
 const TH = 32; // висота ромба
 const THICK = 9; // товщина «шматка землі» під клітинкою
 const ELEV = 0.45; // скільки світових одиниць на 1 м висоти
+>>>>>>> feat/yurii-ui
 
 const BG = '#0e2217';
 const SIDE_L = '#6b4a2f';
@@ -32,7 +39,10 @@ function shade(hex: string, f: number): string {
   return v;
 }
 
+<<<<<<< HEAD
+=======
 // Детермінований «випадковий» шум по клітинці, щоб ліс не мерехтів між кадрами
+>>>>>>> feat/yurii-ui
 function rnd(x: number, y: number, k: number): number {
   let h = Math.imul(x + 1, 374761393) ^ Math.imul(y + 1, 668265263) ^ Math.imul(k + 1, 1103515245);
   h = Math.imul(h ^ (h >>> 13), 1274126177);
@@ -55,12 +65,18 @@ export class CanvasRenderer {
   readonly canvas: HTMLCanvasElement;
   readonly ctx: CanvasRenderingContext2D;
 
+<<<<<<< HEAD
+=======
   /** Клітинка під курсором (для підсвітки при розміщенні інструментів). */
+>>>>>>> feat/yurii-ui
   hoverCell: { x: number; y: number } | null = null;
 
   private animTick = 0;
 
+<<<<<<< HEAD
+=======
   // Камера: екранні_css_px = світові * zoom + offset
+>>>>>>> feat/yurii-ui
   private zoom = 1;
   private offX = 0;
   private offY = 0;
@@ -132,21 +148,30 @@ export class CanvasRenderer {
     this.resizeObserver?.disconnect();
   }
 
+<<<<<<< HEAD
+=======
   // -------------------------------------------------------------------------
   // Публічний API камери
   // -------------------------------------------------------------------------
 
   /** true, якщо поточне натискання миші рухає карту (App тоді не малює). */
+>>>>>>> feat/yurii-ui
   get isPanGesture(): boolean {
     return this.panning;
   }
 
+<<<<<<< HEAD
+=======
   /** true, якщо останній жест реально зсунув карту. */
+>>>>>>> feat/yurii-ui
   get wasDragged(): boolean {
     return this.dragMoved;
   }
 
+<<<<<<< HEAD
+=======
   /** Збільшити/зменшити. Без координат зумить до центру. */
+>>>>>>> feat/yurii-ui
   zoomBy(factor: number, clientX?: number, clientY?: number): void {
     const rect = this.canvas.getBoundingClientRect();
     const mx = (clientX ?? rect.left + rect.width / 2) - rect.left;
@@ -161,18 +186,27 @@ export class CanvasRenderer {
     this.requestRedraw();
   }
 
+<<<<<<< HEAD
+=======
   /** Повернути карту в початковий вигляд (вписати у вікно). */
+>>>>>>> feat/yurii-ui
   resetView(): void {
     this.userMoved = false;
     this.requestRedraw();
   }
 
+<<<<<<< HEAD
+=======
   /** Поточний рівень збільшення відносно «вписаного» вигляду (1 = за замовчуванням). */
+>>>>>>> feat/yurii-ui
   get relativeZoom(): number {
     return this.fitZoom > 0 ? this.zoom / this.fitZoom : 1;
   }
 
+<<<<<<< HEAD
+=======
   /** Координати миші (clientX/Y) -> клітинка сітки з урахуванням висоти пагорбів. */
+>>>>>>> feat/yurii-ui
   screenToCell(clientX: number, clientY: number): { x: number; y: number } | null {
     const grid = this.lastGrid;
     if (!grid) return null;
@@ -198,10 +232,13 @@ export class CanvasRenderer {
     return grid.inBounds(g.x, g.y) ? g : null;
   }
 
+<<<<<<< HEAD
+=======
   // -------------------------------------------------------------------------
   // Камера: внутрішнє
   // -------------------------------------------------------------------------
 
+>>>>>>> feat/yurii-ui
   private minZoom(): number {
     return this.fitZoom * 0.7;
   }
@@ -268,10 +305,13 @@ export class CanvasRenderer {
     });
   }
 
+<<<<<<< HEAD
+=======
   // -------------------------------------------------------------------------
   // Події миші / дотику
   // -------------------------------------------------------------------------
 
+>>>>>>> feat/yurii-ui
   private onWheel = (e: WheelEvent): void => {
     e.preventDefault();
     const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1;
@@ -295,9 +335,13 @@ export class CanvasRenderer {
     this.canvas.style.cursor = 'grabbing';
     try {
       this.canvas.setPointerCapture(e.pointerId);
+<<<<<<< HEAD
+    } catch (_err) {}
+=======
     } catch (_err) {
       // не критично
     }
+>>>>>>> feat/yurii-ui
   };
 
   private onPointerMove = (e: PointerEvent): void => {
@@ -322,9 +366,13 @@ export class CanvasRenderer {
     this.canvas.style.cursor = this.spaceHeld ? 'grab' : this.prevCursor;
     try {
       this.canvas.releasePointerCapture(e.pointerId);
+<<<<<<< HEAD
+    } catch (_err) {}
+=======
     } catch (_err) {
       // не критично
     }
+>>>>>>> feat/yurii-ui
   };
 
   private onKeyDown = (e: KeyboardEvent): void => {
@@ -363,10 +411,13 @@ export class CanvasRenderer {
     }
   }
 
+<<<<<<< HEAD
+=======
   // -------------------------------------------------------------------------
   // Малювання кадру
   // -------------------------------------------------------------------------
 
+>>>>>>> feat/yurii-ui
   render(grid: SimulationGrid, showDangerZones: boolean = false): void {
     this.lastGrid = grid;
     this.lastDanger = showDangerZones;
@@ -385,13 +436,19 @@ export class CanvasRenderer {
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     ctx.setTransform(d * z, 0, 0, d * z, d * this.offX, d * this.offY);
 
+<<<<<<< HEAD
+=======
     // Видима область у світових координатах
+>>>>>>> feat/yurii-ui
     const vx0 = -this.offX / z;
     const vy0 = -this.offY / z;
     const vx1 = (this.cssW - this.offX) / z;
     const vy1 = (this.cssH - this.offY) / z;
 
+<<<<<<< HEAD
+=======
     // Рівень деталізації: чим ближче камера, тим більше деталей
+>>>>>>> feat/yurii-ui
     const lod = z < 0.65 ? 0 : z < 1.3 ? 1 : 2;
 
     const towerAt = new Map<number, number>();
@@ -429,10 +486,10 @@ export class CanvasRenderer {
         if (ti !== undefined) {
           this.drawTower(ctx, cx, cy + TH / 2 - lift);
         }
+<<<<<<< HEAD
       }
     }
 
-    // Зони небезпеки навколо вогню (етап підготовки)
     if (showDangerZones) {
       ctx.fillStyle = 'rgba(239, 83, 80, 0.16)';
       for (const f of fires) {
@@ -451,7 +508,23 @@ export class CanvasRenderer {
       }
     }
 
+=======
+      }
+    }
+
+    // Зони небезпеки навколо вогню (етап підготовки)
+    if (showDangerZones) {
+      ctx.fillStyle = 'rgba(239, 83, 80, 0.16)';
+      for (const f of fires) {
+        const r = 2.5;
+        ctx.beginPath();
+        ctx.ellipse(f.sx, f.sy, r * (TW / 2) * Math.SQRT2, r * (TH / 2) * Math.SQRT2, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
     // Зони покриття веж
+>>>>>>> feat/yurii-ui
     for (let i = 0; i < watchTowers.length; i++) {
       const tw = watchTowers[i];
       const sx = ((tw.x - tw.y) * TW) / 2;
@@ -475,10 +548,15 @@ export class CanvasRenderer {
       ctx.setLineDash([]);
     }
 
+<<<<<<< HEAD
+    this.drawSmoke(ctx, fires);
+
+=======
     // Дим зверху над усім
     this.drawSmoke(ctx, fires);
 
     // Підсвітка клітинки під курсором
+>>>>>>> feat/yurii-ui
     const hc = this.hoverCell;
     if (hc && grid.inBounds(hc.x, hc.y)) {
       const hx = ((hc.x - hc.y) * TW) / 2;
@@ -538,7 +616,10 @@ export class CanvasRenderer {
     const isWater = t === TerrainType.WATER && !burned;
     const topLift = isWater ? lift - 3 : lift;
 
+<<<<<<< HEAD
+=======
     // Колір верхньої грані з легкою строкатістю та підсвіткою пагорба
+>>>>>>> feat/yurii-ui
     let f = 0.94 + Math.floor(rnd(gx, gy, 1) * 7) * 0.02;
     f *= 1 + Math.min(0.2, lift * 0.012);
     f = Math.round(f * 50) / 50;
@@ -548,7 +629,11 @@ export class CanvasRenderer {
     this.drawBlock(ctx, cx, cy, lift, topLift, top);
 
     const bx = cx;
+<<<<<<< HEAD
+    const by = cy + TH / 2 - topLift;
+=======
     const by = cy + TH / 2 - topLift; // центр верхньої грані
+>>>>>>> feat/yurii-ui
 
     if (burned) {
       this.drawBurnedDecor(ctx, bx, by, gx, gy, t, lod);
@@ -583,14 +668,20 @@ export class CanvasRenderer {
     }
 
     if (burning) {
+<<<<<<< HEAD
+=======
       // Розжарена підсвітка землі під полум'ям
+>>>>>>> feat/yurii-ui
       ctx.fillStyle = 'rgba(255, 90, 0, 0.3)';
       this.diamond(ctx, bx, by, 1);
       ctx.fill();
     }
   }
 
+<<<<<<< HEAD
+=======
   /** Ромб із центром (cx,cy) і масштабом k відносно клітинки. */
+>>>>>>> feat/yurii-ui
   private diamond(ctx: CanvasRenderingContext2D, cx: number, cy: number, k: number): void {
     ctx.beginPath();
     ctx.moveTo(cx, cy - (TH / 2) * k);
@@ -643,8 +734,7 @@ export class CanvasRenderer {
     ctx.stroke();
   }
 
-  // ---- Ландшафт -----------------------------------------------------------
-
+<<<<<<< HEAD
   private drawGrass(
     ctx: CanvasRenderingContext2D,
     bx: number,
@@ -653,6 +743,11 @@ export class CanvasRenderer {
     gy: number,
     lod: number
   ): void {
+=======
+  // ---- Ландшафт -----------------------------------------------------------
+
+  private drawGrass(ctx: CanvasRenderingContext2D, bx: number, by: number, gx: number, gy: number, lod: number): void {
+>>>>>>> feat/yurii-ui
     if (lod < 2) return;
     ctx.strokeStyle = '#a5d36a';
     ctx.lineWidth = 0.9;
@@ -747,6 +842,7 @@ export class CanvasRenderer {
     }
   }
 
+<<<<<<< HEAD
   private drawBushes(
     ctx: CanvasRenderingContext2D,
     bx: number,
@@ -755,6 +851,9 @@ export class CanvasRenderer {
     gy: number,
     lod: number
   ): void {
+=======
+  private drawBushes(ctx: CanvasRenderingContext2D, bx: number, by: number, gx: number, gy: number, lod: number): void {
+>>>>>>> feat/yurii-ui
     const n = lod === 0 ? 2 : 3;
     for (let i = 0; i < n; i++) {
       const ox = (rnd(gx, gy, 110 + i) - 0.5) * 26;
@@ -777,6 +876,7 @@ export class CanvasRenderer {
     }
   }
 
+<<<<<<< HEAD
   private drawWater(
     ctx: CanvasRenderingContext2D,
     bx: number,
@@ -785,6 +885,9 @@ export class CanvasRenderer {
     gy: number,
     lod: number
   ): void {
+=======
+  private drawWater(ctx: CanvasRenderingContext2D, bx: number, by: number, gx: number, gy: number, lod: number): void {
+>>>>>>> feat/yurii-ui
     if (lod === 0) return;
     ctx.strokeStyle = 'rgba(191, 230, 251, 0.75)';
     ctx.lineWidth = 1;
@@ -797,6 +900,7 @@ export class CanvasRenderer {
     ctx.stroke();
   }
 
+<<<<<<< HEAD
   private drawWetGround(
     ctx: CanvasRenderingContext2D,
     bx: number,
@@ -804,6 +908,9 @@ export class CanvasRenderer {
     gx: number,
     gy: number
   ): void {
+=======
+  private drawWetGround(ctx: CanvasRenderingContext2D, bx: number, by: number, gx: number, gy: number): void {
+>>>>>>> feat/yurii-ui
     ctx.fillStyle = '#8d6e63';
     this.diamond(ctx, bx, by, 0.7);
     ctx.fill();
@@ -843,8 +950,11 @@ export class CanvasRenderer {
     ctx.stroke();
   }
 
+<<<<<<< HEAD
+=======
   // ---- Будівлі --------------------------------------------------------------
 
+>>>>>>> feat/yurii-ui
   private poly(ctx: CanvasRenderingContext2D, pts: Array<[number, number]>, fill: string): void {
     ctx.fillStyle = fill;
     ctx.beginPath();
@@ -870,7 +980,10 @@ export class CanvasRenderer {
     const B1 = P(h, h, wallH);
     const R1 = P(h, -h, wallH);
 
+<<<<<<< HEAD
+=======
     // тінь
+>>>>>>> feat/yurii-ui
     ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
     ctx.beginPath();
     ctx.ellipse(bx + 3, by + 3, 17, 7, 0, 0, Math.PI * 2);
@@ -890,14 +1003,20 @@ export class CanvasRenderer {
       return;
     }
 
+<<<<<<< HEAD
+=======
     // вікно на лівій стіні
+>>>>>>> feat/yurii-ui
     const w0 = P(-h + 2 * h * 0.35, h, 4);
     const w1 = P(-h + 2 * h * 0.65, h, 4);
     const w2 = P(-h + 2 * h * 0.65, h, 9);
     const w3 = P(-h + 2 * h * 0.35, h, 9);
     this.poly(ctx, [w0, w1, w2, w3], '#fff59d');
 
+<<<<<<< HEAD
+=======
     // дах (чотирисхилий)
+>>>>>>> feat/yurii-ui
     const o = 1.18;
     const L1o = P(-h * o, h * o, wallH);
     const B1o = P(h * o, h * o, wallH);
@@ -940,8 +1059,11 @@ export class CanvasRenderer {
     ctx.stroke();
   }
 
+<<<<<<< HEAD
+=======
   // ---- Згарище, вогонь, дим ----------------------------------------------
 
+>>>>>>> feat/yurii-ui
   private drawBurnedDecor(
     ctx: CanvasRenderingContext2D,
     bx: number,
@@ -973,6 +1095,7 @@ export class CanvasRenderer {
     }
   }
 
+<<<<<<< HEAD
   private drawFire(
     ctx: CanvasRenderingContext2D,
     sx: number,
@@ -981,6 +1104,9 @@ export class CanvasRenderer {
     gy: number,
     lod: number
   ): void {
+=======
+  private drawFire(ctx: CanvasRenderingContext2D, sx: number, sy: number, gx: number, gy: number, lod: number): void {
+>>>>>>> feat/yurii-ui
     const t = this.animTick;
     ctx.fillStyle = 'rgba(255, 120, 20, 0.28)';
     ctx.beginPath();
@@ -1000,6 +1126,7 @@ export class CanvasRenderer {
     }
   }
 
+<<<<<<< HEAD
   private flame(
     ctx: CanvasRenderingContext2D,
     x: number,
@@ -1017,6 +1144,13 @@ export class CanvasRenderer {
       x + Math.sin(this.animTick * 0.2 + x) * 2,
       y - h
     );
+=======
+  private flame(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, color: string): void {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(x - w, y);
+    ctx.quadraticCurveTo(x - w * 1.1, y - h * 0.55, x + Math.sin(this.animTick * 0.2 + x) * 2, y - h);
+>>>>>>> feat/yurii-ui
     ctx.quadraticCurveTo(x + w * 1.1, y - h * 0.55, x + w, y);
     ctx.quadraticCurveTo(x, y + w * 0.5, x - w, y);
     ctx.closePath();
@@ -1037,4 +1171,8 @@ export class CanvasRenderer {
       }
     }
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> feat/yurii-ui

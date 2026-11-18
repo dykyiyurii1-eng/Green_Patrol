@@ -1,5 +1,7 @@
 import { SimulationConfig, TerrainType, PlanningBudgetConfig } from './types';
 
+<<<<<<< HEAD
+=======
 /**
  * DEFAULT_SIMULATION_CONFIG
  *
@@ -10,10 +12,23 @@ import { SimulationConfig, TerrainType, PlanningBudgetConfig } from './types';
  *  - Almeida & Macau (2001/2011) stochastic fire spread models
  *  - Cell2Fire (Pais et al., arXiv:1905.09317)
  */
+>>>>>>> feat/yurii-ui
 export const DEFAULT_SIMULATION_CONFIG: Readonly<SimulationConfig> = {
-  // Base probability of fire catching between adjacent cells under neutral conditions
   p_base: 0.38,
 
+<<<<<<< HEAD
+  p_veg: {
+    [TerrainType.FOREST]: 0.45,
+    [TerrainType.GRASS]: 0.25,
+    [TerrainType.BUSHES]: 0.6,
+    [TerrainType.HOUSES]: 0.55,
+    [TerrainType.WATER]: -1.0,
+    [TerrainType.ROAD]: -1.0,
+    [TerrainType.FIREBREAK]: -1.0,
+    [TerrainType.WET_GROUND]: -1.0,
+  },
+
+=======
   // Vegetation flammability factor p_veg:
   // Water, roads, firebreaks, and wet soil/sand have negative flammability and NEVER burn.
   p_veg: {
@@ -28,11 +43,19 @@ export const DEFAULT_SIMULATION_CONFIG: Readonly<SimulationConfig> = {
   },
 
   // Scaling factor for fuel density contribution
+>>>>>>> feat/yurii-ui
   p_density_scale: 0.3,
 
-  // Wind speed factor c1 (Alexandridis et al. 2008)
   c1: 0.045,
 
+<<<<<<< HEAD
+  c2: 0.13,
+
+  a_slope: 0.08,
+
+  burnDuration: 3,
+
+=======
   // Wind direction alignment sensitivity c2
   c2: 0.13,
 
@@ -44,6 +67,7 @@ export const DEFAULT_SIMULATION_CONFIG: Readonly<SimulationConfig> = {
 
   // Heat & smoke danger radius around active fire where building firebreaks is prohibited
   // Prevents the trivial exploit of cheesing/boxing the fire at point-blank range
+>>>>>>> feat/yurii-ui
   heatDangerRadius: 2,
 };
 
@@ -55,5 +79,9 @@ export const DEFAULT_PLANNING_BUDGET: Readonly<PlanningBudgetConfig> = {
 
 export const DEFAULT_WATCH_TOWER_CONFIG = {
   radius: 6,
+<<<<<<< HEAD
+  mitigationFactor: 0.35,
+=======
   mitigationFactor: 0.35, // Reduces ignition probability by 65% within coverage
+>>>>>>> feat/yurii-ui
 };

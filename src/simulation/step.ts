@@ -2,7 +2,6 @@ import { CellState, TerrainType, EnvironmentState, SimulationConfig } from './ty
 import { SimulationGrid } from './grid';
 import { DEFAULT_SIMULATION_CONFIG } from './config';
 
-// 8 neighbor offsets: dx, dy, and precomputed distance
 const NEIGHBORS = [
   { dx: -1, dy: -1, dist: Math.SQRT2, weight: 1 / Math.SQRT2 },
   { dx: 0, dy: -1, dist: 1.0, weight: 1.0 },
@@ -14,6 +13,8 @@ const NEIGHBORS = [
   { dx: 1, dy: 1, dist: Math.SQRT2, weight: 1 / Math.SQRT2 },
 ];
 
+<<<<<<< HEAD
+=======
 /**
  * Executes a single discrete time tick of the probabilistic cellular automaton on the 30x30 grid.
  *
@@ -24,6 +25,7 @@ const NEIGHBORS = [
  * Special rule for water proximity:
  *   Water, roads, firebreaks, and wet shorelines/sand (WET_GROUND) NEVER ignite (p_burn = 0).
  */
+>>>>>>> feat/yurii-ui
 export function simulationStep(
   grid: SimulationGrid,
   env: EnvironmentState,
@@ -32,22 +34,18 @@ export function simulationStep(
 ): void {
   const { width, height, size, state, terrain, density, elevation, burnTicks, watchTowers } = grid;
 
-  // Next state buffer to ensure pure synchronous CA transitions
   const nextState = new Uint8Array(state);
 
-  // Precompute wind unit vector (0 deg = North blowing, 90 deg = East blowing)
   const windAngleRad = ((env.windDirectionDeg - 90) * Math.PI) / 180;
   const windDirX = Math.cos(windAngleRad);
   const windDirY = Math.sin(windAngleRad);
   const windSpeed = Math.max(0, env.windSpeed);
 
-  // Precompute humidity factor: at 100% humidity, spread is sharply suppressed (98% reduction)
   const normHumidity = Math.max(0, Math.min(100, env.humidity)) / 100;
   const humidityFactor = Math.max(0.01, 1.0 - Math.pow(normHumidity, 1.6) * 0.98);
 
   const hasTowers = watchTowers.length > 0;
 
-  // 1. First pass: Handle burning duration of currently burning cells
   for (let i = 0; i < size; i++) {
     if (state[i] === CellState.BURNING) {
       const ticks = burnTicks[i] + 1;
@@ -58,12 +56,10 @@ export function simulationStep(
     }
   }
 
-  // 2. Second pass: Check unburned cells for potential ignition from adjacent burning cells
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const idx = y * width + x;
 
-      // Only unburned cells can catch fire
       if (state[idx] !== CellState.UNBURNED) {
         continue;
       }
@@ -71,7 +67,10 @@ export function simulationStep(
       const cellTerrain = terrain[idx];
       const p_veg = config.p_veg[cellTerrain as TerrainType] ?? -1.0;
 
+<<<<<<< HEAD
+=======
       // Water, roads, firebreaks, and wet shorelines NEVER ignite
+>>>>>>> feat/yurii-ui
       if (
         p_veg < 0 ||
         cellTerrain === TerrainType.WATER ||
@@ -86,7 +85,6 @@ export function simulationStep(
       const cellDensity = density[idx];
       const p_density = config.p_density_scale * (cellDensity - 1.0);
 
-      // Check watchtower mitigation
       let towerMitigation = 1.0;
       if (hasTowers) {
         for (let t = 0; t < watchTowers.length; t++) {
@@ -98,7 +96,10 @@ export function simulationStep(
         }
       }
 
+<<<<<<< HEAD
+=======
       // Check all 8 neighbors: if neighbor is BURNING, compute ignition chance
+>>>>>>> feat/yurii-ui
       for (let n = 0; n < 8; n++) {
         const neighbor = NEIGHBORS[n];
         const nx = x + neighbor.dx;
@@ -114,7 +115,10 @@ export function simulationStep(
           const spreadDy = -neighbor.dy;
           const dist = neighbor.dist;
 
+<<<<<<< HEAD
+=======
           // Cosine of angle between wind direction and fire spread vector
+>>>>>>> feat/yurii-ui
           const cosTheta = (spreadDx * windDirX + spreadDy * windDirY) / dist;
 
           const p_wind =
@@ -128,7 +132,6 @@ export function simulationStep(
           const slope = elevationDiff / dist;
           const p_slope = Math.max(0.1, Math.min(3.0, Math.exp(config.a_slope * slope)));
 
-          // Multiplicative probability calculation
           let p_burn =
             config.p_base *
             (1.0 + p_veg) *
@@ -144,13 +147,16 @@ export function simulationStep(
           if (rng() < p_burn) {
             nextState[idx] = CellState.BURNING;
             burnTicks[idx] = 0;
+<<<<<<< HEAD
+            break;
+=======
             break; // Cell ignited
+>>>>>>> feat/yurii-ui
           }
         }
       }
     }
   }
 
-  // Synchronously update the grid state
   grid.state.set(nextState);
 }
