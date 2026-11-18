@@ -19,7 +19,12 @@
 
 body {
   font-family: var(--font-family);
+<<<<<<< Updated upstream
   background-color: var(--bg-dark);
+  background-image: radial-gradient(circle at center, #1e2818 0%, #0f140c 100%);
+=======
+  background: linear-gradient(180deg, #d3e7ef 0%, #eaf3f7 100%);
+>>>>>>> Stashed changes
   color: var(--text-main);
   min-height: 100vh;
   display: flex;
@@ -108,7 +113,95 @@ body {
 
 /* ==================== COMPACT HEADER ==================== */
 header {
-  background: var(--panel-bg);
+  background: linear-gradient(180deg, #2b3822 0%, #1d2617 100%);
+  border-bottom: 2px solid var(--border-gold);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  padding: 0.6rem 1.5rem;
+=======
+.intro-screen {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, #e8f4f8 0%, #cce5ee 100%);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 2rem;
+}
+
+.intro-screen.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.intro-content {
+  max-width: 650px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.intro-line {
+  font-size: 2.1rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: #243842;
+  min-height: 3rem;
+  line-height: 1.4;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.intro-line.highlight {
+  font-size: 2.3rem;
+  font-weight: 700;
+  color: #d86847;
+  text-shadow: 0 4px 12px rgba(216, 104, 71, 0.15);
+}
+
+.cursor-blink::after {
+  content: '|';
+  display: inline-block;
+  color: #d86847;
+  animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.skip-btn {
+  background: #ffffff;
+  border: 1px solid var(--panel-border);
+  color: #55707d;
+  padding: 0.55rem 1.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 20px;
+  cursor: pointer;
+  align-self: center;
+  margin-top: 1.8rem;
+  box-shadow: 0 3px 8px rgba(36, 56, 66, 0.06);
+  transition: all 0.2s ease;
+}
+
+.skip-btn:hover {
+  background: #f0f6f9;
+  color: #243842;
+  box-shadow: 0 4px 12px rgba(36, 56, 66, 0.1);
+}
+
+header {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--panel-border);
   padding: 0.55rem 1.25rem;
   display: flex;
@@ -146,6 +239,7 @@ header {
   padding: 3px;
   border-radius: 8px;
   border: 1px solid var(--panel-border);
+>>>>>>> Stashed changes
 }
 
 .mode-btn {
@@ -155,13 +249,15 @@ header {
   padding: 0.4rem 0.85rem;
   font-size: 0.82rem;
   font-weight: 600;
-  border-radius: 6px;
+  border-radius: 8px;
+>>>>>>> Stashed changes
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .mode-btn.active {
-  background: var(--primary);
+  background: linear-gradient(180deg, #4b7d31 0%, #345920 100%);
+  border-color: var(--border-gold-bright);
   color: #fff;
 }
 
@@ -399,15 +495,35 @@ main {
   background: #304033;
 }
 
+.btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #161d12;
+}
+
+/* Активний вибраний інструмент (з яскравою рамкою як "Протипожежна смуга" на макеті) */
 .btn.active {
-  background: var(--primary);
-  border-color: #4caf50;
+  background: linear-gradient(180deg, #4e7e34 0%, #355922 100%);
+  border-color: #a4d65e;
+  box-shadow:
+    0 0 10px rgba(164, 214, 94, 0.35),
+    0 3px 0 #1d3312;
   color: #fff;
 }
 
+/* Вертикальний список інструментів у сайдбарі */
+.sidebar .btn-group.tools-list {
+  flex-direction: column;
+}
+
+.sidebar .btn-group.tools-list .btn {
+  width: 100%;
+  justify-content: flex-start;
+  padding: 0.65rem 0.85rem;
+}
+
 .btn-primary {
-  background: var(--primary);
-  border-color: #4caf50;
+  background: linear-gradient(180deg, #558b2f 0%, #33691e 100%);
+  border: 2px solid var(--border-gold-bright);
   color: #fff;
   width: 100%;
   font-size: 0.85rem;
@@ -415,7 +531,7 @@ main {
 }
 
 .btn-primary:hover {
-  background: var(--primary-hover);
+  background: linear-gradient(180deg, #689f38 0%, #3e7d24 100%);
 }
 
 /* Sandbox Sliders */
@@ -426,6 +542,7 @@ main {
   margin-bottom: 9px;
 }
 
+/* --- ПОВЗУНКИ ТА КОМПАС (ДЛЯ ПІСОЧНИЦІ) --- */
 .control-row {
   display: flex;
   flex-direction: column;
@@ -516,7 +633,13 @@ main {
 
 .stat-value {
   font-weight: 700;
-  color: #81c784;
+  color: var(--primary);
+}
+
+.stat-value.village-saved {
+  color: #ad7112;
+  font-size: 0.84rem;
+>>>>>>> Stashed changes
 }
 
 .stat-value.village-saved {
@@ -525,11 +648,84 @@ main {
 }
 
 .stat-value.burning {
-  color: #ff7043;
+  color: #d86847;
 }
 
 .stat-value.burned {
-  color: #9e9e9e;
+<<<<<<< Updated upstream
+  color: #a19d94;
+}
+
+/* --- МОДАЛЬНЕ ВІКНО ПІДСУМКІВ --- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 14, 8, 0.82);
+=======
+  color: #8c9da5;
+}
+
+.viewport-container {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.65rem;
+}
+
+.canvas-wrapper {
+  flex: 1;
+  width: 100%;
+  min-height: 74vh;
+  background: #cce5ee;
+  padding: 6px;
+  border-radius: 16px;
+  border: 2px solid #b8d4e0;
+  box-shadow: 0 8px 24px rgba(36, 56, 66, 0.07);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+canvas#sim-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 78vh;
+  object-fit: contain;
+  image-rendering: pixelated;
+  cursor: crosshair;
+  border-radius: 10px;
+}
+
+.canvas-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  width: 100%;
+  background: var(--panel-bg);
+  padding: 8px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--panel-border);
+  box-shadow: 0 2px 8px rgba(36, 56, 66, 0.04);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.legend-color {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  display: inline-block;
 }
 
 /* ==================== EXPANDED CANVAS VIEWPORT ==================== */
@@ -599,7 +795,8 @@ canvas#sim-canvas {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(36, 56, 66, 0.4);
+>>>>>>> Stashed changes
   display: flex;
   align-items: center;
   justify-content: center;
@@ -613,23 +810,45 @@ canvas#sim-canvas {
 }
 
 .modal-card {
-  background: var(--panel-bg);
-  border: 2px solid #4caf50;
-  border-radius: 12px;
+<<<<<<< Updated upstream
+  background: linear-gradient(180deg, #2b3822 0%, #1d2617 100%);
+  border: 3px solid var(--border-gold-bright);
+  border-radius: 10px;
   padding: 1.5rem;
   max-width: 480px;
   width: 100%;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.9);
+=======
+  background: #ffffff;
+  border: 2px solid var(--primary);
+  border-radius: 18px;
+  padding: 1.6rem;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 14px 40px rgba(36, 56, 66, 0.2);
+>>>>>>> Stashed changes
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.1rem;
 }
 
 .modal-title {
+<<<<<<< Updated upstream
+  background: linear-gradient(180deg, #43702b 0%, #2d4e1c 100%);
+  border: 1px solid var(--border-gold-bright);
+  border-radius: 6px;
+  padding: 0.6rem;
+  font-size: 1.2rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #f4f1ea;
+=======
   font-size: 1.25rem;
   font-weight: 700;
-  color: #a5d6a7;
+  color: #243842;
+>>>>>>> Stashed changes
   text-align: center;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.8);
 }
 
 .modal-metrics {
@@ -638,15 +857,34 @@ canvas#sim-canvas {
   padding: 0.75rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.55rem;
 }
 
 .modal-metric-row {
   display: flex;
   justify-content: space-between;
+<<<<<<< Updated upstream
+  font-size: 0.9rem;
+  border-bottom: 1px dashed #4a573f;
+  padding-bottom: 0.4rem;
+}
+
+.modal-metric-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+=======
   font-size: 0.88rem;
+  color: #3b525f;
   border-bottom: 1px dashed var(--panel-border);
-  padding-bottom: 0.35rem;
+  padding-bottom: 0.4rem;
+}
+
+.modal-metric-row.highlight-row {
+  border-bottom: 2px solid #e49733;
+  padding-bottom: 0.5rem;
+  font-size: 0.95rem;
+  color: #243842;
+>>>>>>> Stashed changes
 }
 
 .modal-metric-row.highlight-row {
@@ -656,25 +894,44 @@ canvas#sim-canvas {
 }
 
 .metric-val {
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .metric-val.positive {
-  color: #81c784;
+<<<<<<< Updated upstream
+  color: #9ccc65;
 }
 
 .metric-val.negative {
-  color: #e57373;
+  color: #ef5350;
 }
 
 .modal-feedback {
-  background: rgba(46, 125, 50, 0.15);
-  border-left: 4px solid var(--primary);
-  padding: 0.75rem;
-  border-radius: 4px;
+  background: rgba(67, 112, 43, 0.25);
+  border: 1px solid var(--border-gold);
+  border-left: 4px solid #8bc34a;
+  padding: 0.8rem;
+  border-radius: 5px;
   font-size: 0.85rem;
   line-height: 1.45;
-  color: #e8f5e9;
+  color: var(--text-main);
+=======
+  color: var(--primary);
+}
+
+.metric-val.negative {
+  color: #d86847;
+}
+
+.modal-feedback {
+  background: #edf6f0;
+  border-left: 4px solid var(--primary);
+  padding: 0.85rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: #235235;
+>>>>>>> Stashed changes
 }
 
 .hidden {
@@ -1214,6 +1471,13 @@ footer {
   padding: 0.6rem;
   font-size: 0.72rem;
   color: var(--text-muted);
-  border-top: 1px solid var(--panel-border);
-  background: var(--panel-bg);
+  border-top: 2px solid var(--border-gold);
+  background: var(--panel-bg-dark);
 }
+=======
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--panel-border);
+  background: rgba(255, 255, 255, 0.8);
+}
+>>>>>>> Stashed changes
