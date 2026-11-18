@@ -149,6 +149,6 @@ Green_Patrol/
 ---
 
 ## 🏆 Автори проекту
+Yurii Dykyi and Anna Dedyk
+Розроблено для участі у **GENIUS Olympiad 2027** (Категорія Програмуванн).  
 
-Розроблено для участі у **GENIUS Olympiad 2027** (Категорія Coding).  
-Ліцензія: [MIT](LICENSE).

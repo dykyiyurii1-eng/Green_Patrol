@@ -6,17 +6,18 @@ export class SimulationGrid {
   readonly size: number;
 
   state: Uint8Array;
-<<<<<<< Updated upstream
-  /** Static terrain: FOREST, GRASS, WATER, ROAD, FIREBREAK */
-=======
->>>>>>> Stashed changes
+
   terrain: Uint8Array;
+
   density: Float32Array;
+
   elevation: Float32Array;
+
   burnTicks: Uint8Array;
+
   watchTowers: WatchTower[];
 
-  constructor(width: number = 100, height: number = 100) {
+  constructor(width: number = 30, height: number = 30) {
     this.width = width;
     this.height = height;
     this.size = width * height;
@@ -46,12 +47,6 @@ export class SimulationGrid {
     return x >= 0 && x < this.width && y >= 0 && y < this.height;
   }
 
-<<<<<<< Updated upstream
-  /**
-   * Performs an exact deep clone of the grid state and terrain.
-   * Crucial for baseline comparisons and resets.
-   */
-=======
   generateWetShorelines(): void {
     const toWet: number[] = [];
     for (let y = 0; y < this.height; y++) {
@@ -96,7 +91,6 @@ export class SimulationGrid {
     return false;
   }
 
->>>>>>> Stashed changes
   clone(): SimulationGrid {
     const copy = new SimulationGrid(this.width, this.height);
     copy.state.set(this.state);
@@ -108,9 +102,6 @@ export class SimulationGrid {
     return copy;
   }
 
-  /**
-   * Count total cells of a specific terrain type.
-   */
   countTerrain(type: TerrainType): number {
     let count = 0;
     for (let i = 0; i < this.size; i++) {
@@ -121,13 +112,27 @@ export class SimulationGrid {
     return count;
   }
 
-  /**
-   * Count how many FOREST cells are still unburned.
-   */
   countUnburnedForest(): number {
     let count = 0;
     for (let i = 0; i < this.size; i++) {
-      if (this.terrain[i] === TerrainType.FOREST && this.state[i] === CellState.UNBURNED) {
+      if (
+        (this.terrain[i] === TerrainType.FOREST || this.terrain[i] === TerrainType.BUSHES) &&
+        this.state[i] === CellState.UNBURNED
+      ) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  countHouses(): number {
+    return this.countTerrain(TerrainType.HOUSES);
+  }
+
+  countUnburnedHouses(): number {
+    let count = 0;
+    for (let i = 0; i < this.size; i++) {
+      if (this.terrain[i] === TerrainType.HOUSES && this.state[i] === CellState.UNBURNED) {
         count++;
       }
     }

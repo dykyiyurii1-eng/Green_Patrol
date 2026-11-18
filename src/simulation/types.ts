@@ -10,12 +10,9 @@ export enum TerrainType {
   WATER = 2,
   ROAD = 3,
   FIREBREAK = 4,
-<<<<<<< Updated upstream
-=======
   BUSHES = 5,
   HOUSES = 6,
   WET_GROUND = 7,
->>>>>>> Stashed changes
 }
 
 export interface WatchTower {
@@ -27,31 +24,40 @@ export interface WatchTower {
 
 export interface EnvironmentState {
   windSpeed: number;
+
   windDirectionDeg: number;
+
   humidity: number;
 }
 
 export interface SimulationConfig {
   p_base: number;
+
   p_veg: Record<TerrainType, number>;
+
   p_density_scale: number;
+
   c1: number;
+
   c2: number;
+
   a_slope: number;
+
   burnDuration: number;
-<<<<<<< Updated upstream
-=======
+
   heatDangerRadius: number;
->>>>>>> Stashed changes
 }
 
 export interface SimulationMetrics {
   totalCells: number;
   initialForestCells: number;
   currentUnburnedForest: number;
+  initialHouseCells: number;
+  currentUnburnedHouses: number;
   currentBurning: number;
   currentBurned: number;
   forestSavedPercent: number;
+  villageSavedPercent: number;
   ticks: number;
   isComplete: boolean;
 }

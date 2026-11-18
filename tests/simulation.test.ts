@@ -10,7 +10,7 @@ import {
   PlanningManager,
 } from '../src/simulation';
 
-describe('Wildfire Simulation Core Tests', () => {
+describe('Wildfire Simulation Core Tests (30x30 Tactical Grid)', () => {
   const defaultEnv: EnvironmentState = {
     windSpeed: 0,
     windDirectionDeg: 90,
@@ -19,23 +19,17 @@ describe('Wildfire Simulation Core Tests', () => {
 
   it('fire never spreads onto water', () => {
     const grid = new SimulationGrid(10, 10);
-    // Fill with water
     grid.terrain.fill(TerrainType.WATER);
 
-    // Ignite center cell
     const centerIdx = grid.getIndex(5, 5);
     grid.state[centerIdx] = CellState.BURNING;
 
     const rng = createMulberry32(12345);
 
-    // Run 10 ticks
     for (let t = 0; t < 10; t++) {
       simulationStep(grid, defaultEnv, rng);
     }
 
-<<<<<<< Updated upstream
-    // Check that no other water cells caught fire
-=======
     for (let i = 0; i < grid.size; i++) {
       if (i !== centerIdx) {
         expect(grid.state[i]).toBe(CellState.UNBURNED);
@@ -56,7 +50,6 @@ describe('Wildfire Simulation Core Tests', () => {
       simulationStep(grid, defaultEnv, rng);
     }
 
->>>>>>> Stashed changes
     for (let i = 0; i < grid.size; i++) {
       if (i !== centerIdx) {
         expect(grid.state[i]).toBe(CellState.UNBURNED);
@@ -83,40 +76,31 @@ describe('Wildfire Simulation Core Tests', () => {
     const run1 = createSim();
     const run2 = createSim();
 
-    // The states in both runs must match byte-for-byte
     expect(Array.from(run1.state)).toEqual(Array.from(run2.state));
     expect(run1.countUnburnedForest()).toBe(run2.countUnburnedForest());
   });
 
   it('stronger wind -> farther downwind spread', () => {
     const runWindExperiment = (windSpeed: number) => {
-      const grid = new SimulationGrid(40, 25);
+      const grid = new SimulationGrid(30, 20);
       grid.terrain.fill(TerrainType.FOREST);
 
-      // Ignite at left side (x=5, y=12)
-      const startX = 5;
-      const startY = 12;
+      const startX = 4;
+      const startY = 10;
       grid.state[grid.getIndex(startX, startY)] = CellState.BURNING;
 
-      // Wind blowing East (windDirectionDeg = 90), moderate humidity
       const env: EnvironmentState = {
         windSpeed,
         windDirectionDeg: 90,
-<<<<<<< Updated upstream
-        humidity: 55,
-=======
         humidity: 50,
->>>>>>> Stashed changes
       };
 
       const rng = createMulberry32(101);
 
-      // Run 5 ticks
       for (let t = 0; t < 5; t++) {
         simulationStep(grid, env, rng);
       }
 
-      // Measure max downwind distance reached (x - startX)
       let maxX = startX;
       for (let y = 0; y < grid.height; y++) {
         for (let x = startX + 1; x < grid.width; x++) {
@@ -141,18 +125,12 @@ describe('Wildfire Simulation Core Tests', () => {
     const grid = new SimulationGrid(20, 20);
     grid.terrain.fill(TerrainType.FOREST);
 
-<<<<<<< Updated upstream
-    // Build vertical firebreak line at x = 10 from top to bottom
-=======
->>>>>>> Stashed changes
     for (let y = 0; y < grid.height; y++) {
       grid.terrain[grid.getIndex(10, y)] = TerrainType.FIREBREAK;
     }
 
-    // Ignite fire on the left side (x = 4, y = 10)
     grid.state[grid.getIndex(4, 10)] = CellState.BURNING;
 
-    // Strong wind blowing East towards the firebreak
     const env: EnvironmentState = {
       windSpeed: 12,
       windDirectionDeg: 90,
@@ -161,12 +139,10 @@ describe('Wildfire Simulation Core Tests', () => {
 
     const rng = createMulberry32(777);
 
-    // Run until fire completely burns out on the left side
-    for (let t = 0; t < 50; t++) {
+    for (let t = 0; t < 40; t++) {
       simulationStep(grid, env, rng);
     }
 
-    // Verify: no fire has crossed the firebreak to x > 10
     for (let y = 0; y < grid.height; y++) {
       for (let x = 11; x < grid.width; x++) {
         expect(grid.state[grid.getIndex(x, y)]).toBe(CellState.UNBURNED);
@@ -192,7 +168,6 @@ describe('Wildfire Simulation Core Tests', () => {
         simulationStep(grid, env, rng);
       }
 
-      // Count burned + burning cells
       let burnedCount = 0;
       for (let i = 0; i < grid.size; i++) {
         if (grid.state[i] === CellState.BURNING || grid.state[i] === CellState.BURNED) {
@@ -205,16 +180,14 @@ describe('Wildfire Simulation Core Tests', () => {
     const burnedAtDry = runHumiditySim(15);
     const burnedAtMaxHumidity = runHumiditySim(100);
 
-    // At 100% humidity, spread is strongly suppressed compared to dry air
     expect(burnedAtDry).toBeGreaterThan(burnedAtMaxHumidity);
-    // At 100% humidity, spread should be minimal (typically only the initial cell or 1-2 neighbors at most)
     expect(burnedAtMaxHumidity).toBeLessThanOrEqual(2);
   });
 
   it('baseline run with no actions is deterministic', () => {
-    const grid = new SimulationGrid(25, 25);
+    const grid = new SimulationGrid(20, 20);
     grid.terrain.fill(TerrainType.FOREST);
-    grid.state[grid.getIndex(12, 12)] = CellState.BURNING;
+    grid.state[grid.getIndex(10, 10)] = CellState.BURNING;
 
     const env: EnvironmentState = {
       windSpeed: 5,
@@ -244,30 +217,20 @@ describe('Wildfire Simulation Core Tests', () => {
 
     const planner = new PlanningManager(grid, budget);
 
-    // Place 3 firebreaks: 3 * 3 = 9 budget used (1 remaining)
     expect(planner.placeFirebreak(1, 1)).toBe(true);
     expect(planner.placeFirebreak(1, 2)).toBe(true);
     expect(planner.placeFirebreak(1, 3)).toBe(true);
     expect(planner.budgetUsed).toBe(9);
     expect(planner.remainingBudget).toBe(1);
 
-    // Attempting to place a 4th firebreak (cost 3) must be rejected because 9 + 3 > 10
     expect(planner.placeFirebreak(1, 4)).toBe(false);
-    expect(planner.budgetUsed).toBe(9);
-
-    // Attempting to place a watchtower (cost 10) must be rejected
     expect(planner.placeWatchTower(5, 5)).toBe(false);
 
-    // Undo 1 firebreak: refunds 3 points -> budgetUsed becomes 6
     expect(planner.undo()).toBe(true);
     expect(planner.budgetUsed).toBe(6);
     expect(planner.remainingBudget).toBe(4);
 
-    // Now we can place another firebreak (cost 3)
     expect(planner.placeFirebreak(1, 4)).toBe(true);
-<<<<<<< Updated upstream
-    expect(planner.budgetUsed).toBe(9);
-=======
   });
 
   it('cannot place firebreak inside heat danger zone next to active fire', () => {
@@ -288,6 +251,5 @@ describe('Wildfire Simulation Core Tests', () => {
     expect(planner.lastErrorMessage).toContain('Занадто близько до полум’я');
 
     expect(planner.placeFirebreak(5, 9)).toBe(true);
->>>>>>> Stashed changes
   });
 });

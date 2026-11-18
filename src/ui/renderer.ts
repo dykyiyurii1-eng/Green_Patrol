@@ -1,31 +1,13 @@
 import { SimulationGrid, CellState, TerrainType } from '../simulation';
 
-<<<<<<< Updated upstream
-// Visual color palette for terrain and fire states
-const COLORS = {
-  FOREST: '#2e7d32',
-  FOREST_HIGH: '#1b5e20',
-  GRASS: '#8bc34a',
-  WATER: '#0288d1',
-  ROAD: '#757575',
-  FIREBREAK: '#d7ccc8',
-  BURNING_CORE: '#fff176',
-  BURNING_OUTER: '#f4511e',
-  BURNED: '#212121',
-  GRID_LINE: 'rgba(0, 0, 0, 0.04)',
-  TOWER_ZONE: 'rgba(0, 188, 212, 0.18)',
-  TOWER_BORDER: 'rgba(0, 151, 167, 0.6)',
-  TOWER_ICON: '#006064',
-};
-=======
 const TW = 64;
 const TH = 32;
 const THICK = 9;
 const ELEV = 0.45;
 
-const BG = '#cce5ee';
-const SIDE_L = '#8a7768';
-const SIDE_R = '#716053';
+const BG = '#0e2217';
+const SIDE_L = '#6b4a2f';
+const SIDE_R = '#533823';
 
 const shadeCache = new Map<string, string>();
 function shade(hex: string, f: number): string {
@@ -58,14 +40,10 @@ interface FireSpot {
   gx: number;
   gy: number;
 }
->>>>>>> Stashed changes
 
 export class CanvasRenderer {
   readonly canvas: HTMLCanvasElement;
   readonly ctx: CanvasRenderingContext2D;
-<<<<<<< Updated upstream
-  private animTick: number = 0;
-=======
 
   hoverCell: { x: number; y: number } | null = null;
 
@@ -97,7 +75,6 @@ export class CanvasRenderer {
   private prevCursor = '';
 
   private readonly resizeObserver: ResizeObserver | null;
->>>>>>> Stashed changes
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -106,12 +83,31 @@ export class CanvasRenderer {
       throw new Error('Canvas 2D context not supported');
     }
     this.ctx = ctx;
+
+    canvas.style.display = 'block';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.touchAction = 'none';
+
+    canvas.addEventListener('wheel', this.onWheel, { passive: false });
+    canvas.addEventListener('pointerdown', this.onPointerDown);
+    canvas.addEventListener('pointermove', this.onPointerMove);
+    canvas.addEventListener('pointerup', this.onPointerUp);
+    canvas.addEventListener('pointercancel', this.onPointerUp);
+    canvas.addEventListener('pointerleave', this.onPointerLeave);
+    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+    window.addEventListener('keydown', this.onKeyDown);
+    window.addEventListener('keyup', this.onKeyUp);
+
+    const target = canvas.parentElement ?? canvas;
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => this.requestRedraw());
+      this.resizeObserver.observe(target);
+    } else {
+      this.resizeObserver = null;
+    }
   }
 
-<<<<<<< Updated upstream
-  render(grid: SimulationGrid, showGridLines: boolean = false): void {
-    const { width, height, state, terrain, elevation, watchTowers } = grid;
-=======
   dispose(): void {
     this.canvas.removeEventListener('wheel', this.onWheel);
     this.canvas.removeEventListener('pointerdown', this.onPointerDown);
@@ -341,16 +337,11 @@ export class CanvasRenderer {
     this.clampOffset();
 
     const { width, height, state, terrain, watchTowers } = grid;
->>>>>>> Stashed changes
     const ctx = this.ctx;
-    const cellW = this.canvas.width / width;
-    const cellH = this.canvas.height / height;
-
+    const z = this.zoom;
+    const d = this.dpr;
     this.animTick++;
 
-<<<<<<< Updated upstream
-    // 1. Draw each cell
-=======
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = BG;
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -370,54 +361,37 @@ export class CanvasRenderer {
 
     const fires: FireSpot[] = [];
 
->>>>>>> Stashed changes
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const idx = y * width + x;
+        const cx = ((x - y) * TW) / 2;
+        const cy = ((x + y) * TH) / 2;
+        const lift = this.liftAt(grid, x, y);
+
+        if (cx < vx0 - TW || cx > vx1 + TW) continue;
+        if (cy + TH + THICK + 20 < vy0 || cy - lift - 80 > vy1) continue;
+
         const s = state[idx];
         const t = terrain[idx];
-        const elev = elevation[idx];
+        const burning = s === CellState.BURNING;
+        const burned = s === CellState.BURNED;
 
-        let fillColor: string;
+        this.drawCell(ctx, x, y, cx, cy, lift, t, burning, burned, lod);
 
-        if (s === CellState.BURNING) {
-          // Animated pulsating fire
-          const pulse = (Math.sin(this.animTick * 0.2 + x * 0.5 + y * 0.3) + 1) / 2;
-          fillColor = pulse > 0.5 ? COLORS.BURNING_CORE : COLORS.BURNING_OUTER;
-        } else if (s === CellState.BURNED) {
-          fillColor = COLORS.BURNED;
-        } else {
-          // Unburned terrain
-          switch (t) {
-            case TerrainType.FOREST:
-              // Darker green if high elevation
-              fillColor = elev > 20 ? COLORS.FOREST_HIGH : COLORS.FOREST;
-              break;
-            case TerrainType.GRASS:
-              fillColor = COLORS.GRASS;
-              break;
-            case TerrainType.WATER:
-              fillColor = COLORS.WATER;
-              break;
-            case TerrainType.ROAD:
-              fillColor = COLORS.ROAD;
-              break;
-            case TerrainType.FIREBREAK:
-              fillColor = COLORS.FIREBREAK;
-              break;
-            default:
-              fillColor = COLORS.FOREST;
-          }
+        if (burning) {
+          const sx = cx;
+          const sy = cy + TH / 2 - lift;
+          this.drawFire(ctx, sx, sy, x, y, lod);
+          fires.push({ sx, sy, gx: x, gy: y });
         }
 
-        ctx.fillStyle = fillColor;
-        ctx.fillRect(x * cellW, y * cellH, cellW + 0.3, cellH + 0.3);
+        const ti = towerAt.get(idx);
+        if (ti !== undefined) {
+          this.drawTower(ctx, cx, cy + TH / 2 - lift);
+        }
       }
     }
 
-<<<<<<< Updated upstream
-    // 2. Draw watchtowers and coverage radii
-=======
     if (showDangerZones) {
       ctx.fillStyle = 'rgba(239, 83, 80, 0.16)';
       for (const f of fires) {
@@ -436,39 +410,43 @@ export class CanvasRenderer {
       }
     }
 
->>>>>>> Stashed changes
     for (let i = 0; i < watchTowers.length; i++) {
-      const tower = watchTowers[i];
-      const cx = (tower.x + 0.5) * cellW;
-      const cy = (tower.y + 0.5) * cellH;
-      const r = tower.radius * cellW;
-
-      // Draw mitigation circle
+      const tw = watchTowers[i];
+      const sx = ((tw.x - tw.y) * TW) / 2;
+      const sy = ((tw.x + tw.y) * TH) / 2 + TH / 2 - this.liftAt(grid, tw.x, tw.y);
       ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.fillStyle = COLORS.TOWER_ZONE;
+      ctx.ellipse(
+        sx,
+        sy,
+        tw.radius * (TW / 2) * Math.SQRT2,
+        tw.radius * (TH / 2) * Math.SQRT2,
+        0,
+        0,
+        Math.PI * 2
+      );
+      ctx.fillStyle = 'rgba(0, 188, 212, 0.15)';
       ctx.fill();
-      ctx.strokeStyle = COLORS.TOWER_BORDER;
-      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.75)';
+      ctx.lineWidth = 1.5 / z;
+      ctx.setLineDash([6, 6]);
       ctx.stroke();
+      ctx.setLineDash([]);
+    }
 
-<<<<<<< Updated upstream
-      // Draw tower center marker
-=======
     this.drawSmoke(ctx, fires);
 
     const hc = this.hoverCell;
     if (hc && grid.inBounds(hc.x, hc.y)) {
       const hx = ((hc.x - hc.y) * TW) / 2;
       const hy = ((hc.x + hc.y) * TH) / 2 - this.liftAt(grid, hc.x, hc.y);
->>>>>>> Stashed changes
       ctx.beginPath();
-      ctx.arc(cx, cy, cellW * 0.9, 0, Math.PI * 2);
-      ctx.fillStyle = COLORS.TOWER_ICON;
+      ctx.moveTo(hx, hy);
+      ctx.lineTo(hx + TW / 2, hy + TH / 2);
+      ctx.lineTo(hx, hy + TH);
+      ctx.lineTo(hx - TW / 2, hy + TH / 2);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(255, 235, 59, 0.22)';
       ctx.fill();
-<<<<<<< Updated upstream
-      ctx.strokeStyle = '#ffffff';
-=======
       ctx.strokeStyle = '#ffeb3b';
       ctx.lineWidth = 2 / z;
       ctx.stroke();
@@ -851,17 +829,15 @@ export class CanvasRenderer {
 
     if (ruin) {
       ctx.strokeStyle = '#e57373';
->>>>>>> Stashed changes
       ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(L1[0], L1[1]);
+      ctx.lineTo(B1[0], B1[1]);
+      ctx.lineTo(R1[0], R1[1]);
       ctx.stroke();
+      return;
     }
 
-<<<<<<< Updated upstream
-    // 3. Optional subtle grid lines
-    if (showGridLines && cellW > 4) {
-      ctx.strokeStyle = COLORS.GRID_LINE;
-      ctx.lineWidth = 0.5;
-=======
     const w0 = P(-h + 2 * h * 0.35, h, 4);
     const w1 = P(-h + 2 * h * 0.65, h, 4);
     const w2 = P(-h + 2 * h * 0.65, h, 9);
@@ -930,21 +906,16 @@ export class CanvasRenderer {
     } else if (orig === TerrainType.FOREST) {
       ctx.strokeStyle = '#1a1512';
       ctx.lineWidth = 2;
->>>>>>> Stashed changes
       ctx.beginPath();
-      for (let x = 0; x <= width; x += 5) {
-        ctx.moveTo(x * cellW, 0);
-        ctx.lineTo(x * cellW, this.canvas.height);
-      }
-      for (let y = 0; y <= height; y += 5) {
-        ctx.moveTo(0, y * cellH);
-        ctx.lineTo(this.canvas.width, y * cellH);
+      const n = lod === 0 ? 1 : 2;
+      for (let i = 0; i < n; i++) {
+        const ox = (rnd(gx, gy, 150 + i) - 0.5) * 20;
+        ctx.moveTo(bx + ox, by + 2);
+        ctx.lineTo(bx + ox + 1, by - 10 - rnd(gx, gy, 160 + i) * 6);
       }
       ctx.stroke();
     }
   }
-<<<<<<< Updated upstream
-=======
 
   private drawFire(
     ctx: CanvasRenderingContext2D,
@@ -1010,5 +981,4 @@ export class CanvasRenderer {
       }
     }
   }
->>>>>>> Stashed changes
 }
