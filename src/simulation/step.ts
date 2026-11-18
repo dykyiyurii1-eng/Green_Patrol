@@ -13,6 +13,19 @@ const NEIGHBORS = [
   { dx: 1, dy: 1, dist: Math.SQRT2, weight: 1 / Math.SQRT2 },
 ];
 
+<<<<<<< HEAD
+=======
+/**
+ * Executes a single discrete time tick of the probabilistic cellular automaton on the 30x30 grid.
+ *
+ * Implements the multiplicative fire spread formula:
+ *   p_burn = p_base * (1 + p_veg) * (1 + p_density) * p_wind * p_slope
+ *            * humidityFactor * distanceWeight * towerMitigation
+ *
+ * Special rule for water proximity:
+ *   Water, roads, firebreaks, and wet shorelines/sand (WET_GROUND) NEVER ignite (p_burn = 0).
+ */
+>>>>>>> feat/yurii-ui
 export function simulationStep(
   grid: SimulationGrid,
   env: EnvironmentState,
@@ -54,6 +67,10 @@ export function simulationStep(
       const cellTerrain = terrain[idx];
       const p_veg = config.p_veg[cellTerrain as TerrainType] ?? -1.0;
 
+<<<<<<< HEAD
+=======
+      // Water, roads, firebreaks, and wet shorelines NEVER ignite
+>>>>>>> feat/yurii-ui
       if (
         p_veg < 0 ||
         cellTerrain === TerrainType.WATER ||
@@ -79,6 +96,10 @@ export function simulationStep(
         }
       }
 
+<<<<<<< HEAD
+=======
+      // Check all 8 neighbors: if neighbor is BURNING, compute ignition chance
+>>>>>>> feat/yurii-ui
       for (let n = 0; n < 8; n++) {
         const neighbor = NEIGHBORS[n];
         const nx = x + neighbor.dx;
@@ -94,6 +115,10 @@ export function simulationStep(
           const spreadDy = -neighbor.dy;
           const dist = neighbor.dist;
 
+<<<<<<< HEAD
+=======
+          // Cosine of angle between wind direction and fire spread vector
+>>>>>>> feat/yurii-ui
           const cosTheta = (spreadDx * windDirX + spreadDy * windDirY) / dist;
 
           const p_wind =
@@ -122,7 +147,11 @@ export function simulationStep(
           if (rng() < p_burn) {
             nextState[idx] = CellState.BURNING;
             burnTicks[idx] = 0;
+<<<<<<< HEAD
             break;
+=======
+            break; // Cell ignited
+>>>>>>> feat/yurii-ui
           }
         }
       }

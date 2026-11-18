@@ -5,6 +5,7 @@ export enum CellState {
 }
 
 export enum TerrainType {
+<<<<<<< HEAD
   FOREST = 0,
   GRASS = 1,
   WATER = 2,
@@ -13,6 +14,16 @@ export enum TerrainType {
   BUSHES = 5,
   HOUSES = 6,
   WET_GROUND = 7,
+=======
+  FOREST = 0, // Густі дерева
+  GRASS = 1, // Звичайна трава
+  WATER = 2, // Водойма (річка, озеро, ставок)
+  ROAD = 3, // Дорога
+  FIREBREAK = 4, // Мінералізована протипожежна смуга (рів)
+  BUSHES = 5, // Сухі кущі (швидко займаються)
+  HOUSES = 6, // Хатинки селища фермера (ціль оборони!)
+  WET_GROUND = 7, // Мокра земля / пісок біля води (не горить)
+>>>>>>> feat/yurii-ui
 }
 
 export interface WatchTower {
@@ -44,7 +55,11 @@ export interface SimulationConfig {
   a_slope: number;
 
   burnDuration: number;
+<<<<<<< HEAD
 
+=======
+  /** Radius around active fire where building is prohibited (danger heat zone) */
+>>>>>>> feat/yurii-ui
   heatDangerRadius: number;
 }
 

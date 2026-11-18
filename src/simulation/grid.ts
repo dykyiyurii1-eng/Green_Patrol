@@ -6,7 +6,11 @@ export class SimulationGrid {
   readonly size: number;
 
   state: Uint8Array;
+<<<<<<< HEAD
 
+=======
+  /** Static terrain: FOREST, GRASS, WATER, ROAD, FIREBREAK, BUSHES, HOUSES, WET_GROUND */
+>>>>>>> feat/yurii-ui
   terrain: Uint8Array;
 
   density: Float32Array;
@@ -47,12 +51,24 @@ export class SimulationGrid {
     return x >= 0 && x < this.width && y >= 0 && y < this.height;
   }
 
+<<<<<<< HEAD
+=======
+  /**
+   * Automatically marks immediate shoreline perimeter around any WATER cells as WET_GROUND
+   * (unless it's already water or a building). This guarantees physical barrier protection
+   * where fire cannot burn on damp sand/soil near lakes or rivers.
+   */
+>>>>>>> feat/yurii-ui
   generateWetShorelines(): void {
     const toWet: number[] = [];
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
         const idx = this.getIndex(x, y);
         if (this.terrain[idx] === TerrainType.WATER) {
+<<<<<<< HEAD
+=======
+          // Check 8 neighbors
+>>>>>>> feat/yurii-ui
           for (let dy = -1; dy <= 1; dy++) {
             for (let dx = -1; dx <= 1; dx++) {
               const nx = x + dx;
@@ -76,6 +92,13 @@ export class SimulationGrid {
     }
   }
 
+<<<<<<< HEAD
+=======
+  /**
+   * Checks whether cell (x, y) is within danger radius of any actively burning cell.
+   * Used to prevent players from trivially cheesing firebreaks right adjacent to the blaze.
+   */
+>>>>>>> feat/yurii-ui
   isNearActiveFire(x: number, y: number, radius: number): boolean {
     for (let dy = -radius; dy <= radius; dy++) {
       for (let dx = -radius; dx <= radius; dx++) {
@@ -91,6 +114,12 @@ export class SimulationGrid {
     return false;
   }
 
+<<<<<<< HEAD
+=======
+  /**
+   * Performs an exact deep clone of the grid state and terrain.
+   */
+>>>>>>> feat/yurii-ui
   clone(): SimulationGrid {
     const copy = new SimulationGrid(this.width, this.height);
     copy.state.set(this.state);

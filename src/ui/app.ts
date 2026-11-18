@@ -44,6 +44,7 @@ export class App {
   private isMouseDown: boolean = false;
   private lastDrawnCell: { x: number; y: number } | null = null;
 
+<<<<<<< HEAD
   private selectedCell: { x: number; y: number } | null = null;
   private cellActionMenu!: HTMLElement;
   private cellInfoCard!: HTMLElement;
@@ -54,12 +55,19 @@ export class App {
   private cellInfoDefense!: HTMLElement;
   private mainMenuOverlay!: HTMLElement;
 
+=======
+  // Intro Elements
+>>>>>>> feat/yurii-ui
   private introOverlay!: HTMLElement;
   private introLine1El!: HTMLElement;
   private introLine2El!: HTMLElement;
   private skipIntroBtn!: HTMLButtonElement;
   private isIntroFinished: boolean = false;
 
+<<<<<<< HEAD
+=======
+  // DOM Elements
+>>>>>>> feat/yurii-ui
   private modePlanningBtn!: HTMLButtonElement;
   private modeSandboxBtn!: HTMLButtonElement;
   private scenarioSelect!: HTMLSelectElement;
@@ -121,6 +129,10 @@ export class App {
     this.rng = createMulberry32(this.seed);
     this.env = { ...this.currentScenario.env };
 
+<<<<<<< HEAD
+=======
+    // 30x30 tactical grid
+>>>>>>> feat/yurii-ui
     this.grid = new SimulationGrid(30, 30);
     this.cleanGrid = new SimulationGrid(30, 30);
     this.currentScenario.init(this.cleanGrid);
@@ -137,7 +149,14 @@ export class App {
     this.computeBaseline();
     this.updateUIState();
 
+<<<<<<< HEAD
     this.playCinematicIntro();
+=======
+    // Start intro sequence
+    this.playCinematicIntro();
+
+    // Start render loop
+>>>>>>> feat/yurii-ui
     this.startRenderLoop();
   }
 
@@ -157,8 +176,13 @@ export class App {
       b.title = title;
       b.setAttribute('aria-label', title);
       b.style.cssText =
+<<<<<<< HEAD
         'width:38px;height:38px;font:700 18px/1 sans-serif;color:#243842;' +
         'background:#ffffff;border:1.5px solid #b8d4e0;border-radius:10px;cursor:pointer;box-shadow:0 2px 6px rgba(36,56,66,0.1);';
+=======
+        'width:38px;height:38px;font:700 18px/1 sans-serif;color:#e8f5e9;' +
+        'background:rgba(18,48,31,0.92);border:2px solid #c9a24a;border-radius:8px;cursor:pointer;';
+>>>>>>> feat/yurii-ui
       b.addEventListener('click', (e) => {
         e.stopPropagation();
         action();
@@ -172,6 +196,7 @@ export class App {
   }
 
   private initDOMElements(): void {
+<<<<<<< HEAD
     this.mainMenuOverlay = document.getElementById('main-menu-overlay') as HTMLElement;
     this.cellActionMenu = document.getElementById('cell-action-menu') as HTMLElement;
     this.cellInfoCard = document.getElementById('cell-info-card') as HTMLElement;
@@ -181,6 +206,9 @@ export class App {
     this.cellInfoRisk = document.getElementById('cell-info-risk') as HTMLElement;
     this.cellInfoDefense = document.getElementById('cell-info-defense') as HTMLElement;
 
+=======
+    // Intro
+>>>>>>> feat/yurii-ui
     this.introOverlay = document.getElementById('intro-overlay') as HTMLElement;
     this.introLine1El = document.getElementById('intro-line-1') as HTMLElement;
     this.introLine2El = document.getElementById('intro-line-2') as HTMLElement;
@@ -226,6 +254,10 @@ export class App {
     this.speed5Btn = document.getElementById('speed-5-btn') as HTMLButtonElement;
     this.stepBtn = document.getElementById('step-btn') as HTMLButtonElement;
 
+<<<<<<< HEAD
+=======
+    // Stats
+>>>>>>> feat/yurii-ui
     this.statVillageEl = document.getElementById('stat-village') as HTMLElement;
     this.statSavedEl = document.getElementById('stat-saved') as HTMLElement;
     this.statBurningEl = document.getElementById('stat-burning') as HTMLElement;
@@ -251,6 +283,7 @@ export class App {
     const typeLine1 = () => {
       if (this.isIntroFinished) return;
       if (charIdx < text1.length) {
+<<<<<<< HEAD
         this.introLine1El.textContent += text1[charIdx];
         charIdx++;
         setTimeout(typeLine1, 75);
@@ -258,6 +291,14 @@ export class App {
         this.introLine1El.classList.remove('cursor-blink');
         setTimeout(() => {
           if (this.isIntroFinished) return;
+=======
+        this.introLine1El.textContent = text1.slice(0, charIdx + 1);
+        charIdx++;
+        setTimeout(typeLine1, 65);
+      } else {
+        this.introLine1El.classList.remove('cursor-blink');
+        setTimeout(() => {
+>>>>>>> feat/yurii-ui
           charIdx = 0;
           this.introLine2El.classList.add('cursor-blink');
           typeLine2();
@@ -268,6 +309,7 @@ export class App {
     const typeLine2 = () => {
       if (this.isIntroFinished) return;
       if (charIdx < text2.length) {
+<<<<<<< HEAD
         this.introLine2El.textContent += text2[charIdx];
         charIdx++;
         setTimeout(typeLine2, 60);
@@ -281,6 +323,19 @@ export class App {
     };
 
     setTimeout(typeLine1, 400);
+=======
+        this.introLine2El.textContent = text2.slice(0, charIdx + 1);
+        charIdx++;
+        setTimeout(typeLine2, 65);
+      } else {
+        setTimeout(() => {
+          this.finishIntro();
+        }, 1200);
+      }
+    };
+
+    setTimeout(typeLine1, 300);
+>>>>>>> feat/yurii-ui
   }
 
   private finishIntro(): void {
@@ -293,6 +348,7 @@ export class App {
   }
 
   private bindEvents(): void {
+<<<<<<< HEAD
     document.getElementById('main-menu-play-btn')?.addEventListener('click', () => {
       this.mainMenuOverlay?.classList.add('hidden');
     });
@@ -400,6 +456,9 @@ export class App {
       this.cellInfoCard.classList.remove('hidden');
     });
 
+=======
+    // Skip intro button & click
+>>>>>>> feat/yurii-ui
     this.skipIntroBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       this.finishIntro();
@@ -408,6 +467,10 @@ export class App {
       this.finishIntro();
     });
 
+<<<<<<< HEAD
+=======
+    // Mode Switching
+>>>>>>> feat/yurii-ui
     this.modePlanningBtn.addEventListener('click', () => this.switchMode('planning'));
     this.modeSandboxBtn.addEventListener('click', () => this.switchMode('sandbox'));
 
@@ -635,6 +698,24 @@ export class App {
     this.updateUIState();
   }
 
+<<<<<<< HEAD
+=======
+  private setActiveTool(tool: ToolType): void {
+    this.activeTool = tool;
+    this.updateToolButtons();
+  }
+
+  private updateToolButtons(): void {
+    this.toolFirebreakBtn.classList.toggle('active', this.activeTool === 'firebreak');
+    this.toolWatchtowerBtn.classList.toggle('active', this.activeTool === 'watchtower');
+
+    this.toolIgniteBtn.classList.toggle('active', this.activeTool === 'ignite');
+    this.toolSandboxFirebreakBtn.classList.toggle('active', this.activeTool === 'firebreak');
+    this.toolForestBtn.classList.toggle('active', this.activeTool === 'forest');
+    this.toolWaterBtn.classList.toggle('active', this.activeTool === 'water');
+  }
+
+>>>>>>> feat/yurii-ui
   private loadScenario(scenario: ScenarioDefinition): void {
     this.currentScenario = scenario;
     this.seed = scenario.seed;
@@ -657,6 +738,24 @@ export class App {
     this.scenarioDescEl.textContent = scenario.description;
     this.scenarioDescEl.classList.add('hidden');
 
+<<<<<<< HEAD
+=======
+    this.cleanGrid = new SimulationGrid(30, 30);
+    scenario.init(this.cleanGrid);
+    this.initialForestCount =
+      this.cleanGrid.countTerrain(TerrainType.FOREST) +
+      this.cleanGrid.countTerrain(TerrainType.BUSHES);
+    this.initialHousesCount = this.cleanGrid.countHouses();
+
+    this.computeBaseline();
+
+    if (this.currentMode === 'planning') {
+      this.resetPlanningToScenario();
+    } else {
+      this.resetSandbox();
+    }
+
+>>>>>>> feat/yurii-ui
     this.windSpeedSlider.value = this.env.windSpeed.toString();
     this.windSpeedVal.textContent = `${this.env.windSpeed.toFixed(1)} м/с`;
     this.windDirSlider.value = this.env.windDirectionDeg.toString();
@@ -670,6 +769,7 @@ export class App {
     this.renderer.resetView();
   }
 
+<<<<<<< HEAD
   private setActiveTool(tool: ToolType): void {
     this.activeTool = tool;
     this.updateToolButtons();
@@ -686,16 +786,57 @@ export class App {
       this.toolForestBtn.classList.toggle('active', this.activeTool === 'forest');
       this.toolWaterBtn.classList.toggle('active', this.activeTool === 'water');
     }
+=======
+  private computeBaseline(): void {
+    this.baselineResult = runBaselineSimulation(
+      this.cleanGrid,
+      this.currentScenario.env,
+      this.currentScenario.seed,
+      this.maxSimulationTicks
+    );
+  }
+
+  private resetPlanningToScenario(): void {
+    this.isRunning = false;
+    this.ticksElapsed = 0;
+    this.planningPhase = 'prepare';
+    this.rng = createMulberry32(this.seed);
+    this.grid = this.cleanGrid.clone();
+    this.planningManager = new PlanningManager(this.grid, this.currentScenario.budget);
+    this.simControlsPanel.classList.add('hidden');
+    this.startFireBtn.classList.remove('hidden');
+    this.planningErrorEl.classList.add('hidden');
+    this.resultsModal.classList.add('hidden');
+    this.updateUIState();
+>>>>>>> feat/yurii-ui
   }
 
   private startFirePhase(): void {
     if (this.planningPhase !== 'prepare') return;
 
     this.planningPhase = 'fire';
+<<<<<<< HEAD
     this.planningErrorEl.classList.add('hidden');
     this.simControlsPanel.classList.remove('hidden');
     this.startFireBtn.classList.add('hidden');
     this.isRunning = true;
+=======
+    this.isRunning = true;
+    this.ticksElapsed = 0;
+    this.rng = createMulberry32(this.seed);
+    this.simControlsPanel.classList.remove('hidden');
+    this.startFireBtn.classList.add('hidden');
+    this.planningErrorEl.classList.add('hidden');
+    this.updateUIState();
+  }
+
+  private retryPlanning(): void {
+    this.resetPlanningToScenario();
+  }
+
+  private resetSandbox(): void {
+    this.isRunning = false;
+>>>>>>> feat/yurii-ui
     this.ticksElapsed = 0;
     this.updateUIState();
   }
@@ -777,7 +918,15 @@ export class App {
     const baselineSaved = this.baselineResult ? this.baselineResult.savedPercent : 0;
     const diff = savedPercent - baselineSaved;
 
+<<<<<<< HEAD
     this.resultVillageEl.textContent = `${unburnedHouses} / ${totalHouses} (${housesPercent.toFixed(0)}% врятовано)`;
+=======
+    const unburnedHouses = this.grid.countUnburnedHouses();
+    const totalHouses = this.initialHousesCount;
+    const housesPercent = totalHouses > 0 ? (unburnedHouses / totalHouses) * 100 : 100;
+
+    this.resultVillageEl.textContent = `${unburnedHouses} / ${totalHouses} (${housesPercent.toFixed(0)}% вціліло)`;
+>>>>>>> feat/yurii-ui
     this.resultVillageEl.className =
       housesPercent === 100 ? 'metric-val positive' : 'metric-val negative';
 
@@ -794,6 +943,10 @@ export class App {
 
     this.resultBudgetEl.textContent = `${this.planningManager.budgetUsed} / ${this.currentScenario.budget.totalBudget} балів`;
 
+<<<<<<< HEAD
+=======
+    // Ukrainian feedback tailored to farmer's mission
+>>>>>>> feat/yurii-ui
     let feedback = '';
     if (housesPercent === 100 && savedPercent >= 75) {
       feedback =
@@ -833,6 +986,10 @@ export class App {
       this.budgetTextEl.textContent = `${used} / ${budget} балів (залишилось ${budget - used})`;
     }
 
+<<<<<<< HEAD
+=======
+    // Statistics
+>>>>>>> feat/yurii-ui
     const unburnedHouses = this.grid.countUnburnedHouses();
     const totalHouses = this.initialHousesCount;
     const housesPct = totalHouses > 0 ? (unburnedHouses / totalHouses) * 100 : 100;
