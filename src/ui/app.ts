@@ -53,14 +53,6 @@ export class App {
   private isIntroFinished: boolean = false;
 
   // DOM Elements
-=======
-  private introOverlay!: HTMLElement;
-  private introLine1El!: HTMLElement;
-  private introLine2El!: HTMLElement;
-  private skipIntroBtn!: HTMLButtonElement;
-  private isIntroFinished: boolean = false;
-
->>>>>>> Stashed changes
   private modePlanningBtn!: HTMLButtonElement;
   private modeSandboxBtn!: HTMLButtonElement;
   private modeSurvivalBtn!: HTMLButtonElement;
@@ -71,6 +63,7 @@ export class App {
   private scenarioSelect!: HTMLSelectElement;
   private scenarioDescEl!: HTMLElement;
 
+  // Planning Controls
   private planningPanel!: HTMLElement;
   private budgetBarEl!: HTMLElement;
   private budgetTextEl!: HTMLElement;
@@ -81,6 +74,7 @@ export class App {
   private resetPlanBtn!: HTMLButtonElement;
   private startFireBtn!: HTMLButtonElement;
 
+  // Sandbox Controls
   private sandboxPanel!: HTMLElement;
   private toolIgniteBtn!: HTMLButtonElement;
   private toolSandboxFirebreakBtn!: HTMLButtonElement;
@@ -96,6 +90,7 @@ export class App {
   private sandboxPlayBtn!: HTMLButtonElement;
   private sandboxResetBtn!: HTMLButtonElement;
 
+  // Simulation Controls & Stats
   private simControlsPanel!: HTMLElement;
   private playPauseBtn!: HTMLButtonElement;
   private speed1Btn!: HTMLButtonElement;
@@ -108,6 +103,7 @@ export class App {
   private statBurningEl!: HTMLElement;
   private statBurnedEl!: HTMLElement;
 
+  // Results Modal
   private resultsModal!: HTMLElement;
   private resultVillageEl!: HTMLElement;
   private resultSavedEl!: HTMLElement;
@@ -198,6 +194,7 @@ export class App {
     this.scenarioSelect = document.getElementById('scenario-select') as HTMLSelectElement;
     this.scenarioDescEl = document.getElementById('scenario-description') as HTMLElement;
 
+    // Planning
     this.planningPanel = document.getElementById('planning-panel') as HTMLElement;
     this.budgetBarEl = document.getElementById('budget-progress') as HTMLElement;
     this.budgetTextEl = document.getElementById('budget-text') as HTMLElement;
@@ -208,6 +205,7 @@ export class App {
     this.resetPlanBtn = document.getElementById('reset-plan-btn') as HTMLButtonElement;
     this.startFireBtn = document.getElementById('start-fire-btn') as HTMLButtonElement;
 
+    // Sandbox
     this.sandboxPanel = document.getElementById('sandbox-panel') as HTMLElement;
     this.toolIgniteBtn = document.getElementById('tool-ignite-btn') as HTMLButtonElement;
     this.toolSandboxFirebreakBtn = document.getElementById(
@@ -226,6 +224,7 @@ export class App {
     this.sandboxPlayBtn = document.getElementById('sandbox-play-btn') as HTMLButtonElement;
     this.sandboxResetBtn = document.getElementById('sandbox-reset-btn') as HTMLButtonElement;
 
+    // Sim controls
     this.simControlsPanel = document.getElementById('sim-controls-panel') as HTMLElement;
     this.playPauseBtn = document.getElementById('play-pause-btn') as HTMLButtonElement;
     this.speed1Btn = document.getElementById('speed-1-btn') as HTMLButtonElement;
@@ -233,13 +232,13 @@ export class App {
     this.speed5Btn = document.getElementById('speed-5-btn') as HTMLButtonElement;
     this.stepBtn = document.getElementById('step-btn') as HTMLButtonElement;
 
-<<<<<<< Updated upstream
     // Stats
     this.statVillageEl = document.getElementById('stat-village') as HTMLElement;
     this.statSavedEl = document.getElementById('stat-saved') as HTMLElement;
     this.statBurningEl = document.getElementById('stat-burning') as HTMLElement;
     this.statBurnedEl = document.getElementById('stat-burned') as HTMLElement;
 
+    // Results modal
     this.resultsModal = document.getElementById('results-modal') as HTMLElement;
     this.resultVillageEl = document.getElementById('result-village-val') as HTMLElement;
     this.resultSavedEl = document.getElementById('result-saved-val') as HTMLElement;
@@ -309,20 +308,11 @@ export class App {
     });
 
     // Mode Switching
-=======
-    this.skipIntroBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.finishIntro();
-    });
-    this.introOverlay.addEventListener('click', () => {
-      this.finishIntro();
-    });
-
->>>>>>> Stashed changes
     this.modePlanningBtn.addEventListener('click', () => this.switchMode('planning'));
     this.modeSandboxBtn.addEventListener('click', () => this.switchMode('sandbox'));
     this.modeSurvivalBtn.addEventListener('click', () => this.switchMode('survival'));
 
+    // Scenario Switching
     this.scenarioSelect.addEventListener('change', (e) => {
       const id = (e.target as HTMLSelectElement).value;
       const found = SCENARIOS.find((s) => s.id === id);
@@ -331,6 +321,7 @@ export class App {
       }
     });
 
+    // Planning Tools
     this.toolFirebreakBtn.addEventListener('click', () => this.setActiveTool('firebreak'));
     this.toolWatchtowerBtn.addEventListener('click', () => this.setActiveTool('watchtower'));
     this.undoBtn.addEventListener('click', () => {
@@ -349,6 +340,7 @@ export class App {
     });
     this.startFireBtn.addEventListener('click', () => this.startFirePhase());
 
+    // Sandbox Tools
     this.toolIgniteBtn.addEventListener('click', () => this.setActiveTool('ignite'));
     this.toolSandboxFirebreakBtn.addEventListener('click', () => this.setActiveTool('firebreak'));
     this.toolForestBtn.addEventListener('click', () => this.setActiveTool('forest'));
@@ -376,17 +368,20 @@ export class App {
     this.sandboxPlayBtn.addEventListener('click', () => this.toggleSimulation());
     this.sandboxResetBtn.addEventListener('click', () => this.resetSandbox());
 
+    // Simulation Execution Controls
     this.playPauseBtn.addEventListener('click', () => this.toggleSimulation());
     this.speed1Btn.addEventListener('click', () => this.setSpeed(1));
     this.speed2Btn.addEventListener('click', () => this.setSpeed(2));
     this.speed5Btn.addEventListener('click', () => this.setSpeed(5));
     this.stepBtn.addEventListener('click', () => this.stepOnce());
 
+    // Modal retry
     this.retryBtn.addEventListener('click', () => {
       this.resultsModal.classList.add('hidden');
       this.retryPlanning();
     });
 
+    // Canvas Mouse Interaction
     this.canvas.addEventListener('mousedown', (e) => {
       if (e.button !== 0 || this.renderer.isPanGesture) return;
       this.isMouseDown = true;
@@ -404,6 +399,7 @@ export class App {
       }
     });
 
+    // Touch support for tablets/smartboards
     this.canvas.addEventListener('touchstart', (e) => {
       e.preventDefault();
       this.isMouseDown = true;
@@ -471,6 +467,7 @@ export class App {
 
       this.updateUIState();
     } else {
+      // Sandbox mode
       const idx = this.grid.getIndex(cellX, cellY);
       switch (this.activeTool) {
         case 'ignite':
@@ -735,6 +732,7 @@ export class App {
     this.updateToolButtons();
     this.updatePlayPauseButtons();
 
+    // Budget in planning
     if (this.currentMode === 'planning') {
       const budget = this.currentScenario.budget.totalBudget;
       const used = this.planningManager.budgetUsed;
@@ -745,7 +743,6 @@ export class App {
       this.budgetTextEl.textContent = `${used} / ${budget} балів (залишилось ${budget - used})`;
     }
 
-<<<<<<< Updated upstream
     // Statistics
     const unburnedHouses = this.grid.countUnburnedHouses();
     const totalHouses = this.initialHousesCount;

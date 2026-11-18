@@ -1,6 +1,5 @@
 import { SimulationConfig, TerrainType, PlanningBudgetConfig } from './types';
 
-<<<<<<< Updated upstream
 /**
  * DEFAULT_SIMULATION_CONFIG
  *
@@ -11,11 +10,9 @@ import { SimulationConfig, TerrainType, PlanningBudgetConfig } from './types';
  *  - Almeida & Macau (2001/2011) stochastic fire spread models
  *  - Cell2Fire (Pais et al., arXiv:1905.09317)
  */
-=======
->>>>>>> Stashed changes
 export const DEFAULT_SIMULATION_CONFIG: Readonly<SimulationConfig> = {
+  // Base probability of fire catching between adjacent cells under neutral conditions
   p_base: 0.38,
-<<<<<<< Updated upstream
 
   // Vegetation flammability factor p_veg:
   // Water, roads, firebreaks, and wet soil/sand have negative flammability and NEVER burn.
@@ -32,8 +29,9 @@ export const DEFAULT_SIMULATION_CONFIG: Readonly<SimulationConfig> = {
 
   // Scaling factor for fuel density contribution
   p_density_scale: 0.3,
+
+  // Wind speed factor c1 (Alexandridis et al. 2008)
   c1: 0.045,
-<<<<<<< Updated upstream
 
   // Wind direction alignment sensitivity c2
   c2: 0.13,
