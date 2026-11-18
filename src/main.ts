@@ -6,5 +6,6 @@ window.addEventListener('DOMContentLoaded', () => {
     throw new Error('Canvas element #sim-canvas not found');
   }
 
+  // Initialize application
   new App(canvas);
 });
