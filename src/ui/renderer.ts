@@ -438,7 +438,15 @@ export class CanvasRenderer {
       for (const f of fires) {
         const r = 2.5;
         ctx.beginPath();
-        ctx.ellipse(f.sx, f.sy, r * (TW / 2) * Math.SQRT2, r * (TH / 2) * Math.SQRT2, 0, 0, Math.PI * 2);
+        ctx.ellipse(
+          f.sx,
+          f.sy,
+          r * (TW / 2) * Math.SQRT2,
+          r * (TH / 2) * Math.SQRT2,
+          0,
+          0,
+          Math.PI * 2
+        );
         ctx.fill();
       }
     }
@@ -637,7 +645,14 @@ export class CanvasRenderer {
 
   // ---- Ландшафт -----------------------------------------------------------
 
-  private drawGrass(ctx: CanvasRenderingContext2D, bx: number, by: number, gx: number, gy: number, lod: number): void {
+  private drawGrass(
+    ctx: CanvasRenderingContext2D,
+    bx: number,
+    by: number,
+    gx: number,
+    gy: number,
+    lod: number
+  ): void {
     if (lod < 2) return;
     ctx.strokeStyle = '#a5d36a';
     ctx.lineWidth = 0.9;
@@ -732,7 +747,14 @@ export class CanvasRenderer {
     }
   }
 
-  private drawBushes(ctx: CanvasRenderingContext2D, bx: number, by: number, gx: number, gy: number, lod: number): void {
+  private drawBushes(
+    ctx: CanvasRenderingContext2D,
+    bx: number,
+    by: number,
+    gx: number,
+    gy: number,
+    lod: number
+  ): void {
     const n = lod === 0 ? 2 : 3;
     for (let i = 0; i < n; i++) {
       const ox = (rnd(gx, gy, 110 + i) - 0.5) * 26;
@@ -755,7 +777,14 @@ export class CanvasRenderer {
     }
   }
 
-  private drawWater(ctx: CanvasRenderingContext2D, bx: number, by: number, gx: number, gy: number, lod: number): void {
+  private drawWater(
+    ctx: CanvasRenderingContext2D,
+    bx: number,
+    by: number,
+    gx: number,
+    gy: number,
+    lod: number
+  ): void {
     if (lod === 0) return;
     ctx.strokeStyle = 'rgba(191, 230, 251, 0.75)';
     ctx.lineWidth = 1;
@@ -768,7 +797,13 @@ export class CanvasRenderer {
     ctx.stroke();
   }
 
-  private drawWetGround(ctx: CanvasRenderingContext2D, bx: number, by: number, gx: number, gy: number): void {
+  private drawWetGround(
+    ctx: CanvasRenderingContext2D,
+    bx: number,
+    by: number,
+    gx: number,
+    gy: number
+  ): void {
     ctx.fillStyle = '#8d6e63';
     this.diamond(ctx, bx, by, 0.7);
     ctx.fill();
@@ -938,7 +973,14 @@ export class CanvasRenderer {
     }
   }
 
-  private drawFire(ctx: CanvasRenderingContext2D, sx: number, sy: number, gx: number, gy: number, lod: number): void {
+  private drawFire(
+    ctx: CanvasRenderingContext2D,
+    sx: number,
+    sy: number,
+    gx: number,
+    gy: number,
+    lod: number
+  ): void {
     const t = this.animTick;
     ctx.fillStyle = 'rgba(255, 120, 20, 0.28)';
     ctx.beginPath();
@@ -958,11 +1000,23 @@ export class CanvasRenderer {
     }
   }
 
-  private flame(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, color: string): void {
+  private flame(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    color: string
+  ): void {
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.moveTo(x - w, y);
-    ctx.quadraticCurveTo(x - w * 1.1, y - h * 0.55, x + Math.sin(this.animTick * 0.2 + x) * 2, y - h);
+    ctx.quadraticCurveTo(
+      x - w * 1.1,
+      y - h * 0.55,
+      x + Math.sin(this.animTick * 0.2 + x) * 2,
+      y - h
+    );
     ctx.quadraticCurveTo(x + w * 1.1, y - h * 0.55, x + w, y);
     ctx.quadraticCurveTo(x, y + w * 0.5, x - w, y);
     ctx.closePath();

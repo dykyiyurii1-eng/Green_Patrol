@@ -11,8 +11,9 @@ import {
 } from '../simulation';
 import { SCENARIOS, ScenarioDefinition } from '../content/scenarios';
 import { CanvasRenderer } from './renderer';
+import { SurvivalMode } from './survivalMode';
 
-export type GameMode = 'planning' | 'sandbox';
+export type GameMode = 'planning' | 'sandbox' | 'survival';
 export type PlanningPhase = 'prepare' | 'fire' | 'results';
 export type ToolType = 'firebreak' | 'watchtower' | 'ignite' | 'forest' | 'water';
 
@@ -54,6 +55,11 @@ export class App {
   // DOM Elements
   private modePlanningBtn!: HTMLButtonElement;
   private modeSandboxBtn!: HTMLButtonElement;
+  private modeSurvivalBtn!: HTMLButtonElement;
+  private survivalContainer!: HTMLElement;
+  private viewportContainer!: HTMLElement;
+  private sidebarEl!: HTMLElement;
+  private survivalMode!: SurvivalMode;
   private scenarioSelect!: HTMLSelectElement;
   private scenarioDescEl!: HTMLElement;
 
@@ -180,6 +186,11 @@ export class App {
 
     this.modePlanningBtn = document.getElementById('mode-planning-btn') as HTMLButtonElement;
     this.modeSandboxBtn = document.getElementById('mode-sandbox-btn') as HTMLButtonElement;
+    this.modeSurvivalBtn = document.getElementById('mode-survival-btn') as HTMLButtonElement;
+    this.survivalContainer = document.getElementById('survival-container') as HTMLElement;
+    this.viewportContainer = document.querySelector('.viewport-container') as HTMLElement;
+    this.sidebarEl = document.querySelector('.sidebar') as HTMLElement;
+    this.survivalMode = new SurvivalMode(this.survivalContainer, () => this.switchMode('planning'));
     this.scenarioSelect = document.getElementById('scenario-select') as HTMLSelectElement;
     this.scenarioDescEl = document.getElementById('scenario-description') as HTMLElement;
 
@@ -299,6 +310,7 @@ export class App {
     // Mode Switching
     this.modePlanningBtn.addEventListener('click', () => this.switchMode('planning'));
     this.modeSandboxBtn.addEventListener('click', () => this.switchMode('sandbox'));
+    this.modeSurvivalBtn.addEventListener('click', () => this.switchMode('survival'));
 
     // Scenario Switching
     this.scenarioSelect.addEventListener('change', (e) => {
@@ -491,23 +503,35 @@ export class App {
     this.currentMode = mode;
     this.isRunning = false;
 
-    if (mode === 'planning') {
-      this.modePlanningBtn.classList.add('active');
-      this.modeSandboxBtn.classList.remove('active');
-      this.planningPanel.classList.remove('hidden');
-      this.sandboxPanel.classList.add('hidden');
-      this.simControlsPanel.classList.add('hidden');
-      this.planningPhase = 'prepare';
-      this.activeTool = 'firebreak';
-      this.resetPlanningToScenario();
-    } else {
-      this.modePlanningBtn.classList.remove('active');
-      this.modeSandboxBtn.classList.add('active');
-      this.planningPanel.classList.add('hidden');
-      this.sandboxPanel.classList.remove('hidden');
-      this.simControlsPanel.classList.remove('hidden');
-      this.activeTool = 'ignite';
+    this.modePlanningBtn.classList.toggle('active', mode === 'planning');
+    this.modeSandboxBtn.classList.toggle('active', mode === 'sandbox');
+    this.modeSurvivalBtn.classList.toggle('active', mode === 'survival');
+
+    if (mode === 'survival') {
+      this.viewportContainer.classList.add('hidden');
+      this.sidebarEl.classList.add('hidden');
+      this.survivalContainer.classList.remove('hidden');
       this.resultsModal.classList.add('hidden');
+      this.survivalMode.start();
+    } else {
+      this.viewportContainer.classList.remove('hidden');
+      this.sidebarEl.classList.remove('hidden');
+      this.survivalContainer.classList.add('hidden');
+
+      if (mode === 'planning') {
+        this.planningPanel.classList.remove('hidden');
+        this.sandboxPanel.classList.add('hidden');
+        this.simControlsPanel.classList.add('hidden');
+        this.planningPhase = 'prepare';
+        this.activeTool = 'firebreak';
+        this.resetPlanningToScenario();
+      } else {
+        this.planningPanel.classList.add('hidden');
+        this.sandboxPanel.classList.remove('hidden');
+        this.simControlsPanel.classList.remove('hidden');
+        this.activeTool = 'ignite';
+        this.resultsModal.classList.add('hidden');
+      }
     }
 
     this.updateUIState();
