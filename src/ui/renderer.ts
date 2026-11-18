@@ -1,36 +1,92 @@
 import { SimulationGrid, CellState, TerrainType } from '../simulation';
 
-const COLORS = {
-  GRASS: '#689f38',
-  GRASS_DETAIL: '#7cb342',
-  FOREST_BASE: '#2e7d32',
-  BUSH_BASE: '#827717',
-  WATER: '#0288d1',
-  WATER_RIPPLE: '#81d4fa',
-  WET_GROUND: '#5d4037',
-  WET_GROUND_SAND: '#795548',
-  ROAD: '#616161',
-  ROAD_EDGE: '#424242',
-  FIREBREAK: '#d7ccc8',
-  FIREBREAK_FURROW: '#a1887f',
-  HOUSE_WALL: '#d7ccc8',
-  HOUSE_ROOF: '#c62828',
-  HOUSE_WINDOW: '#fff59d',
-  BURNING_CORE: '#fff9c4',
-  BURNING_MID: '#ff9800',
-  BURNING_OUTER: '#d84315',
-  BURNED: '#1c1c1c',
-  BURNED_ASH: '#424242',
-  GRID_LINE: 'rgba(255, 255, 255, 0.05)',
-  TOWER_ZONE: 'rgba(0, 188, 212, 0.16)',
-  TOWER_BORDER: 'rgba(0, 151, 167, 0.7)',
-  DANGER_ZONE: 'rgba(239, 83, 80, 0.14)',
-};
+// ---------------------------------------------------------------------------
+// Ізометричний рендер «Зеленого патруля».
+// Логіку симуляції не чіпає: читає тільки grid.state / terrain / elevation /
+// watchTowers. Публічний API: render(grid, showDangerZones) + камера
+// (zoomBy, resetView, screenToCell, isPanGesture).
+// Керування: колесо = зум до курсора; права/середня кнопка або Пробіл + драг =
+// рухати карту. Ліва кнопка залишається за App (малювання смуг, інструменти).
+// ---------------------------------------------------------------------------
+
+const TW = 64; // ширина ромба клітинки у світових одиницях
+const TH = 32; // висота ромба
+const THICK = 9; // товщина «шматка землі» під клітинкою
+const ELEV = 0.45; // скільки світових одиниць на 1 м висоти
+
+const BG = '#0e2217';
+const SIDE_L = '#6b4a2f';
+const SIDE_R = '#533823';
+
+const shadeCache = new Map<string, string>();
+function shade(hex: string, f: number): string {
+  const key = hex + '|' + f;
+  let v = shadeCache.get(key);
+  if (v) return v;
+  const n = parseInt(hex.slice(1), 16);
+  const r = Math.min(255, Math.round(((n >> 16) & 255) * f));
+  const g = Math.min(255, Math.round(((n >> 8) & 255) * f));
+  const b = Math.min(255, Math.round((n & 255) * f));
+  v = `rgb(${r},${g},${b})`;
+  shadeCache.set(key, v);
+  return v;
+}
+
+// Детермінований «випадковий» шум по клітинці, щоб ліс не мерехтів між кадрами
+function rnd(x: number, y: number, k: number): number {
+  let h = Math.imul(x + 1, 374761393) ^ Math.imul(y + 1, 668265263) ^ Math.imul(k + 1, 1103515245);
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  h ^= h >>> 16;
+  return (h >>> 0) / 4294967296;
+}
+
+function clamp(v: number, lo: number, hi: number): number {
+  return Math.max(lo, Math.min(hi, v));
+}
+
+interface FireSpot {
+  sx: number;
+  sy: number;
+  gx: number;
+  gy: number;
+}
 
 export class CanvasRenderer {
   readonly canvas: HTMLCanvasElement;
   readonly ctx: CanvasRenderingContext2D;
-  private animTick: number = 0;
+
+  /** Клітинка під курсором (для підсвітки при розміщенні інструментів). */
+  hoverCell: { x: number; y: number } | null = null;
+
+  private animTick = 0;
+
+  // Камера: екранні_css_px = світові * zoom + offset
+  private zoom = 1;
+  private offX = 0;
+  private offY = 0;
+  private fitZoom = 1;
+  private userMoved = false;
+
+  private dpr = 1;
+  private cssW = 0;
+  private cssH = 0;
+
+  private lastGrid: SimulationGrid | null = null;
+  private lastDanger = false;
+  private redrawQueued = false;
+
+  private pressed = false;
+  private panning = false;
+  private spaceHeld = false;
+  private dragMoved = false;
+  private pointerId = -1;
+  private downX = 0;
+  private downY = 0;
+  private lastX = 0;
+  private lastY = 0;
+  private prevCursor = '';
+
+  private readonly resizeObserver: ResizeObserver | null;
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -39,290 +95,892 @@ export class CanvasRenderer {
       throw new Error('Canvas 2D context not supported');
     }
     this.ctx = ctx;
+
+    canvas.style.display = 'block';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.touchAction = 'none';
+
+    canvas.addEventListener('wheel', this.onWheel, { passive: false });
+    canvas.addEventListener('pointerdown', this.onPointerDown);
+    canvas.addEventListener('pointermove', this.onPointerMove);
+    canvas.addEventListener('pointerup', this.onPointerUp);
+    canvas.addEventListener('pointercancel', this.onPointerUp);
+    canvas.addEventListener('pointerleave', this.onPointerLeave);
+    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+    window.addEventListener('keydown', this.onKeyDown);
+    window.addEventListener('keyup', this.onKeyUp);
+
+    const target = canvas.parentElement ?? canvas;
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => this.requestRedraw());
+      this.resizeObserver.observe(target);
+    } else {
+      this.resizeObserver = null;
+    }
   }
 
-  render(grid: SimulationGrid, showDangerZones: boolean = false): void {
-    const { width, height, state, terrain, elevation, watchTowers } = grid;
-    const ctx = this.ctx;
-    const cw = this.canvas.width / width;
-    const ch = this.canvas.height / height;
+  dispose(): void {
+    this.canvas.removeEventListener('wheel', this.onWheel);
+    this.canvas.removeEventListener('pointerdown', this.onPointerDown);
+    this.canvas.removeEventListener('pointermove', this.onPointerMove);
+    this.canvas.removeEventListener('pointerup', this.onPointerUp);
+    this.canvas.removeEventListener('pointercancel', this.onPointerUp);
+    this.canvas.removeEventListener('pointerleave', this.onPointerLeave);
+    window.removeEventListener('keydown', this.onKeyDown);
+    window.removeEventListener('keyup', this.onKeyUp);
+    this.resizeObserver?.disconnect();
+  }
 
+  // -------------------------------------------------------------------------
+  // Публічний API камери
+  // -------------------------------------------------------------------------
+
+  /** true, якщо поточне натискання миші рухає карту (App тоді не малює). */
+  get isPanGesture(): boolean {
+    return this.panning;
+  }
+
+  /** true, якщо останній жест реально зсунув карту. */
+  get wasDragged(): boolean {
+    return this.dragMoved;
+  }
+
+  /** Збільшити/зменшити. Без координат зумить до центру. */
+  zoomBy(factor: number, clientX?: number, clientY?: number): void {
+    const rect = this.canvas.getBoundingClientRect();
+    const mx = (clientX ?? rect.left + rect.width / 2) - rect.left;
+    const my = (clientY ?? rect.top + rect.height / 2) - rect.top;
+    const nz = clamp(this.zoom * factor, this.minZoom(), this.maxZoom());
+    const k = nz / this.zoom;
+    this.offX = mx - (mx - this.offX) * k;
+    this.offY = my - (my - this.offY) * k;
+    this.zoom = nz;
+    this.userMoved = true;
+    this.clampOffset();
+    this.requestRedraw();
+  }
+
+  /** Повернути карту в початковий вигляд (вписати у вікно). */
+  resetView(): void {
+    this.userMoved = false;
+    this.requestRedraw();
+  }
+
+  /** Поточний рівень збільшення відносно «вписаного» вигляду (1 = за замовчуванням). */
+  get relativeZoom(): number {
+    return this.fitZoom > 0 ? this.zoom / this.fitZoom : 1;
+  }
+
+  /** Координати миші (clientX/Y) -> клітинка сітки з урахуванням висоти пагорбів. */
+  screenToCell(clientX: number, clientY: number): { x: number; y: number } | null {
+    const grid = this.lastGrid;
+    if (!grid) return null;
+    const rect = this.canvas.getBoundingClientRect();
+    const wx = (clientX - rect.left - this.offX) / this.zoom;
+    const wy = (clientY - rect.top - this.offY) / this.zoom;
+
+    const toCell = (sx: number, sy: number): { x: number; y: number } => {
+      const a = sx / (TW / 2);
+      const b = sy / (TH / 2);
+      return { x: Math.floor((a + b) / 2), y: Math.floor((b - a) / 2) };
+    };
+
+    const g = toCell(wx, wy);
+    for (let k = 3; k >= 0; k--) {
+      const cx = g.x + k;
+      const cy = g.y + k;
+      if (!grid.inBounds(cx, cy)) continue;
+      const lift = this.liftAt(grid, cx, cy);
+      const c = toCell(wx, wy + lift);
+      if (c.x === cx && c.y === cy) return { x: cx, y: cy };
+    }
+    return grid.inBounds(g.x, g.y) ? g : null;
+  }
+
+  // -------------------------------------------------------------------------
+  // Камера: внутрішнє
+  // -------------------------------------------------------------------------
+
+  private minZoom(): number {
+    return this.fitZoom * 0.7;
+  }
+
+  private maxZoom(): number {
+    return Math.max(this.fitZoom * 6, 2.5);
+  }
+
+  private bounds(grid: SimulationGrid): { minX: number; maxX: number; minY: number; maxY: number } {
+    return {
+      minX: (-grid.height * TW) / 2,
+      maxX: (grid.width * TW) / 2,
+      minY: -60,
+      maxY: ((grid.width + grid.height) * TH) / 2 + THICK + 20,
+    };
+  }
+
+  private computeFit(grid: SimulationGrid): void {
+    const b = this.bounds(grid);
+    const pad = 24;
+    const z = Math.min(
+      (this.cssW - pad * 2) / (b.maxX - b.minX),
+      (this.cssH - pad * 2) / (b.maxY - b.minY)
+    );
+    this.fitZoom = clamp(z, 0.05, 4);
+    if (!this.userMoved) {
+      this.zoom = this.fitZoom;
+      this.offX = this.cssW / 2 - (this.zoom * (b.minX + b.maxX)) / 2;
+      this.offY = this.cssH / 2 - (this.zoom * (b.minY + b.maxY)) / 2;
+    }
+  }
+
+  private clampOffset(): void {
+    const grid = this.lastGrid;
+    if (!grid) return;
+    const b = this.bounds(grid);
+    const m = 80;
+    this.offX = clamp(this.offX, m - b.maxX * this.zoom, this.cssW - m - b.minX * this.zoom);
+    this.offY = clamp(this.offY, m - b.maxY * this.zoom, this.cssH - m - b.minY * this.zoom);
+  }
+
+  private syncSize(): boolean {
+    const rect = this.canvas.getBoundingClientRect();
+    if (rect.width < 2 || rect.height < 2) return false;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = Math.min(4096, Math.round(rect.width * dpr));
+    const h = Math.min(4096, Math.round(rect.height * dpr));
+    if (this.canvas.width !== w || this.canvas.height !== h) {
+      this.canvas.width = w;
+      this.canvas.height = h;
+    }
+    this.dpr = dpr;
+    this.cssW = rect.width;
+    this.cssH = rect.height;
+    return true;
+  }
+
+  private requestRedraw(): void {
+    if (this.redrawQueued) return;
+    this.redrawQueued = true;
+    requestAnimationFrame(() => {
+      this.redrawQueued = false;
+      if (this.lastGrid) this.render(this.lastGrid, this.lastDanger);
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // Події миші / дотику
+  // -------------------------------------------------------------------------
+
+  private onWheel = (e: WheelEvent): void => {
+    e.preventDefault();
+    const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1;
+    this.zoomBy(Math.exp(-e.deltaY * unit * 0.0015), e.clientX, e.clientY);
+  };
+
+  private onPointerDown = (e: PointerEvent): void => {
+    const wantsPan = e.button === 1 || e.button === 2 || (e.button === 0 && this.spaceHeld);
+    if (!wantsPan) {
+      this.pressed = false;
+      return;
+    }
+    if (e.button === 1) e.preventDefault();
+    this.pressed = true;
+    this.panning = true;
+    this.dragMoved = false;
+    this.pointerId = e.pointerId;
+    this.downX = this.lastX = e.clientX;
+    this.downY = this.lastY = e.clientY;
+    this.prevCursor = this.canvas.style.cursor;
+    this.canvas.style.cursor = 'grabbing';
+    try {
+      this.canvas.setPointerCapture(e.pointerId);
+    } catch (_err) {
+      // не критично
+    }
+  };
+
+  private onPointerMove = (e: PointerEvent): void => {
+    if (!this.pressed || e.pointerId !== this.pointerId) {
+      this.updateHover(e.clientX, e.clientY);
+      return;
+    }
+    if (Math.hypot(e.clientX - this.downX, e.clientY - this.downY) > 3) this.dragMoved = true;
+    this.offX += e.clientX - this.lastX;
+    this.offY += e.clientY - this.lastY;
+    this.lastX = e.clientX;
+    this.lastY = e.clientY;
+    this.userMoved = true;
+    this.clampOffset();
+    this.requestRedraw();
+  };
+
+  private onPointerUp = (e: PointerEvent): void => {
+    if (e.pointerId !== this.pointerId || !this.pressed) return;
+    this.pressed = false;
+    this.panning = false;
+    this.canvas.style.cursor = this.spaceHeld ? 'grab' : this.prevCursor;
+    try {
+      this.canvas.releasePointerCapture(e.pointerId);
+    } catch (_err) {
+      // не критично
+    }
+  };
+
+  private onKeyDown = (e: KeyboardEvent): void => {
+    if (e.code !== 'Space' || this.spaceHeld) return;
+    const el = e.target as HTMLElement | null;
+    const tag = el?.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'BUTTON') return;
+    this.spaceHeld = true;
+    e.preventDefault();
+    if (!this.panning) {
+      this.prevCursor = this.canvas.style.cursor;
+      this.canvas.style.cursor = 'grab';
+    }
+  };
+
+  private onKeyUp = (e: KeyboardEvent): void => {
+    if (e.code !== 'Space' || !this.spaceHeld) return;
+    this.spaceHeld = false;
+    if (!this.panning) this.canvas.style.cursor = this.prevCursor;
+  };
+
+  private onPointerLeave = (): void => {
+    if (this.hoverCell) {
+      this.hoverCell = null;
+      this.requestRedraw();
+    }
+  };
+
+  private updateHover(clientX: number, clientY: number): void {
+    const c = this.screenToCell(clientX, clientY);
+    const prev = this.hoverCell;
+    const changed = (c?.x ?? -1) !== (prev?.x ?? -1) || (c?.y ?? -1) !== (prev?.y ?? -1);
+    if (changed) {
+      this.hoverCell = c;
+      this.requestRedraw();
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Малювання кадру
+  // -------------------------------------------------------------------------
+
+  render(grid: SimulationGrid, showDangerZones: boolean = false): void {
+    this.lastGrid = grid;
+    this.lastDanger = showDangerZones;
+    if (!this.syncSize()) return;
+    this.computeFit(grid);
+    this.clampOffset();
+
+    const { width, height, state, terrain, watchTowers } = grid;
+    const ctx = this.ctx;
+    const z = this.zoom;
+    const d = this.dpr;
     this.animTick++;
 
-    // 1. Draw each cell
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = BG;
+    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    ctx.setTransform(d * z, 0, 0, d * z, d * this.offX, d * this.offY);
+
+    // Видима область у світових координатах
+    const vx0 = -this.offX / z;
+    const vy0 = -this.offY / z;
+    const vx1 = (this.cssW - this.offX) / z;
+    const vy1 = (this.cssH - this.offY) / z;
+
+    // Рівень деталізації: чим ближче камера, тим більше деталей
+    const lod = z < 0.65 ? 0 : z < 1.3 ? 1 : 2;
+
+    const towerAt = new Map<number, number>();
+    for (let i = 0; i < watchTowers.length; i++) {
+      towerAt.set(watchTowers[i].y * width + watchTowers[i].x, i);
+    }
+
+    const fires: FireSpot[] = [];
+
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const idx = y * width + x;
+        const cx = ((x - y) * TW) / 2;
+        const cy = ((x + y) * TH) / 2;
+        const lift = this.liftAt(grid, x, y);
+
+        if (cx < vx0 - TW || cx > vx1 + TW) continue;
+        if (cy + TH + THICK + 20 < vy0 || cy - lift - 80 > vy1) continue;
+
         const s = state[idx];
         const t = terrain[idx];
-        const elev = elevation[idx];
-        const px = x * cw;
-        const py = y * ch;
+        const burning = s === CellState.BURNING;
+        const burned = s === CellState.BURNED;
 
-        if (s === CellState.BURNING) {
-          this.drawBurningCell(ctx, px, py, cw, ch, x, y);
-        } else if (s === CellState.BURNED) {
-          this.drawBurnedCell(ctx, px, py, cw, ch, t);
-        } else {
-          this.drawTerrainCell(ctx, px, py, cw, ch, t, elev);
+        this.drawCell(ctx, x, y, cx, cy, lift, t, burning, burned, lod);
+
+        if (burning) {
+          const sx = cx;
+          const sy = cy + TH / 2 - lift;
+          this.drawFire(ctx, sx, sy, x, y, lod);
+          fires.push({ sx, sy, gx: x, gy: y });
         }
 
-        // Subtle cell grid boundary
-        ctx.strokeStyle = COLORS.GRID_LINE;
-        ctx.lineWidth = 0.5;
-        ctx.strokeRect(px, py, cw, ch);
+        const ti = towerAt.get(idx);
+        if (ti !== undefined) {
+          this.drawTower(ctx, cx, cy + TH / 2 - lift);
+        }
       }
     }
 
-    // 2. Draw danger heat zone around fire in preparation phase
+    // Зони небезпеки навколо вогню (етап підготовки)
     if (showDangerZones) {
-      ctx.fillStyle = COLORS.DANGER_ZONE;
-      for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-          if (grid.state[grid.getIndex(x, y)] === CellState.BURNING) {
-            ctx.beginPath();
-            ctx.arc((x + 0.5) * cw, (y + 0.5) * ch, cw * 2.5, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
+      ctx.fillStyle = 'rgba(239, 83, 80, 0.16)';
+      for (const f of fires) {
+        const r = 2.5;
+        ctx.beginPath();
+        ctx.ellipse(f.sx, f.sy, r * (TW / 2) * Math.SQRT2, r * (TH / 2) * Math.SQRT2, 0, 0, Math.PI * 2);
+        ctx.fill();
       }
     }
 
-    // 3. Draw watchtowers and coverage zones
+    // Зони покриття веж
     for (let i = 0; i < watchTowers.length; i++) {
-      const tower = watchTowers[i];
-      const cx = (tower.x + 0.5) * cw;
-      const cy = (tower.y + 0.5) * ch;
-      const r = tower.radius * cw;
-
-      // Protective water zone
+      const tw = watchTowers[i];
+      const sx = ((tw.x - tw.y) * TW) / 2;
+      const sy = ((tw.x + tw.y) * TH) / 2 + TH / 2 - this.liftAt(grid, tw.x, tw.y);
       ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.fillStyle = COLORS.TOWER_ZONE;
+      ctx.ellipse(
+        sx,
+        sy,
+        tw.radius * (TW / 2) * Math.SQRT2,
+        tw.radius * (TH / 2) * Math.SQRT2,
+        0,
+        0,
+        Math.PI * 2
+      );
+      ctx.fillStyle = 'rgba(0, 188, 212, 0.15)';
       ctx.fill();
-      ctx.strokeStyle = COLORS.TOWER_BORDER;
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.75)';
+      ctx.lineWidth = 1.5 / z;
+      ctx.setLineDash([6, 6]);
       ctx.stroke();
       ctx.setLineDash([]);
+    }
 
-      // Watchtower icon
-      this.drawTowerIcon(ctx, cx, cy, cw);
+    // Дим зверху над усім
+    this.drawSmoke(ctx, fires);
+
+    // Підсвітка клітинки під курсором
+    const hc = this.hoverCell;
+    if (hc && grid.inBounds(hc.x, hc.y)) {
+      const hx = ((hc.x - hc.y) * TW) / 2;
+      const hy = ((hc.x + hc.y) * TH) / 2 - this.liftAt(grid, hc.x, hc.y);
+      ctx.beginPath();
+      ctx.moveTo(hx, hy);
+      ctx.lineTo(hx + TW / 2, hy + TH / 2);
+      ctx.lineTo(hx, hy + TH);
+      ctx.lineTo(hx - TW / 2, hy + TH / 2);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(255, 235, 59, 0.22)';
+      ctx.fill();
+      ctx.strokeStyle = '#ffeb3b';
+      ctx.lineWidth = 2 / z;
+      ctx.stroke();
     }
   }
 
-  private drawTerrainCell(
-    ctx: CanvasRenderingContext2D,
-    px: number,
-    py: number,
-    w: number,
-    h: number,
-    type: TerrainType,
-    elev: number
-  ): void {
-    switch (type) {
-      case TerrainType.FOREST: {
-        // Deep forest with tree sprite
-        const hillOffset = Math.min(25, elev * 0.4);
-        ctx.fillStyle = hillOffset > 0 ? '#1b5e20' : COLORS.FOREST_BASE;
-        ctx.fillRect(px, py, w, h);
+  private liftAt(grid: SimulationGrid, x: number, y: number): number {
+    const e = grid.elevation[y * grid.width + x];
+    return e > 0 ? Math.min(40, e * ELEV) : 0;
+  }
 
-        // Pine tree icon
-        ctx.fillStyle = '#3e2723';
-        ctx.fillRect(px + w * 0.43, py + h * 0.65, w * 0.14, h * 0.3); // Trunk
-
-        ctx.fillStyle = '#1b5e20';
-        ctx.beginPath();
-        ctx.moveTo(px + w * 0.5, py + h * 0.15);
-        ctx.lineTo(px + w * 0.8, py + h * 0.7);
-        ctx.lineTo(px + w * 0.2, py + h * 0.7);
-        ctx.closePath();
-        ctx.fill();
-        break;
-      }
-
-      case TerrainType.BUSHES: {
-        // Bushy ground with shrub cluster
-        ctx.fillStyle = '#827717';
-        ctx.fillRect(px, py, w, h);
-
-        ctx.fillStyle = '#9e9d24';
-        ctx.beginPath();
-        ctx.arc(px + w * 0.35, py + h * 0.55, w * 0.22, 0, Math.PI * 2);
-        ctx.arc(px + w * 0.65, py + h * 0.55, w * 0.22, 0, Math.PI * 2);
-        ctx.arc(px + w * 0.5, py + h * 0.4, w * 0.24, 0, Math.PI * 2);
-        ctx.fill();
-        break;
-      }
-
-      case TerrainType.HOUSES: {
-        // Village house of the farmer
-        ctx.fillStyle = '#558b2f'; // Garden grass around house
-        ctx.fillRect(px, py, w, h);
-
-        // House walls
-        const hw = w * 0.68;
-        const hh = h * 0.45;
-        const hx = px + (w - hw) / 2;
-        const hy = py + h * 0.45;
-        ctx.fillStyle = COLORS.HOUSE_WALL;
-        ctx.fillRect(hx, hy, hw, hh);
-
-        // Roof
-        ctx.fillStyle = COLORS.HOUSE_ROOF;
-        ctx.beginPath();
-        ctx.moveTo(px + w * 0.5, py + h * 0.18);
-        ctx.lineTo(hx + hw + 2, hy);
-        ctx.lineTo(hx - 2, hy);
-        ctx.closePath();
-        ctx.fill();
-
-        // Glowing window
-        ctx.fillStyle = COLORS.HOUSE_WINDOW;
-        ctx.fillRect(hx + hw * 0.35, hy + hh * 0.25, hw * 0.3, hh * 0.4);
-        break;
-      }
-
-      case TerrainType.WATER: {
-        // Shimmering water
-        ctx.fillStyle = COLORS.WATER;
-        ctx.fillRect(px, py, w, h);
-
-        // Wave ripple
-        ctx.strokeStyle = COLORS.WATER_RIPPLE;
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        const waveY = py + h * 0.5 + Math.sin(this.animTick * 0.08 + px * 0.2) * 1.5;
-        ctx.moveTo(px + w * 0.2, waveY);
-        ctx.lineTo(px + w * 0.8, waveY);
-        ctx.stroke();
-        break;
-      }
-
-      case TerrainType.WET_GROUND: {
-        // Damp shoreline sand/soil (fire cannot burn here)
-        ctx.fillStyle = COLORS.WET_GROUND;
-        ctx.fillRect(px, py, w, h);
-
-        ctx.fillStyle = COLORS.WET_GROUND_SAND;
-        ctx.fillRect(px + w * 0.15, py + h * 0.15, w * 0.7, h * 0.7);
-
-        // Water droplets/damp shine
-        ctx.fillStyle = 'rgba(129, 212, 250, 0.4)';
-        ctx.beginPath();
-        ctx.arc(px + w * 0.4, py + h * 0.4, 2, 0, Math.PI * 2);
-        ctx.arc(px + w * 0.7, py + h * 0.65, 1.5, 0, Math.PI * 2);
-        ctx.fill();
-        break;
-      }
-
-      case TerrainType.ROAD: {
-        ctx.fillStyle = COLORS.ROAD;
-        ctx.fillRect(px, py, w, h);
-        ctx.strokeStyle = COLORS.ROAD_EDGE;
-        ctx.lineWidth = 1;
-        ctx.strokeRect(px, py, w, h);
-        break;
-      }
-
-      case TerrainType.FIREBREAK: {
-        // Plowing trench
-        ctx.fillStyle = COLORS.FIREBREAK;
-        ctx.fillRect(px, py, w, h);
-
-        ctx.strokeStyle = COLORS.FIREBREAK_FURROW;
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(px + w * 0.2, py + 2);
-        ctx.lineTo(px + w * 0.2, py + h - 2);
-        ctx.moveTo(px + w * 0.5, py + 2);
-        ctx.lineTo(px + w * 0.5, py + h - 2);
-        ctx.moveTo(px + w * 0.8, py + 2);
-        ctx.lineTo(px + w * 0.8, py + h - 2);
-        ctx.stroke();
-        break;
-      }
-
-      default: {
-        // Plain grass
-        ctx.fillStyle = COLORS.GRASS;
-        ctx.fillRect(px, py, w, h);
-        break;
-      }
+  private groundColor(t: TerrainType): string {
+    switch (t) {
+      case TerrainType.FOREST:
+        return '#2f7d35';
+      case TerrainType.BUSHES:
+        return '#9aa63a';
+      case TerrainType.HOUSES:
+        return '#86b84a';
+      case TerrainType.WATER:
+        return '#1e9be0';
+      case TerrainType.WET_GROUND:
+        return '#6d4c41';
+      case TerrainType.ROAD:
+        return '#707070';
+      case TerrainType.FIREBREAK:
+        return '#e2d2ab';
+      default:
+        return '#86b84a';
     }
   }
 
-  private drawBurningCell(
+  private drawCell(
     ctx: CanvasRenderingContext2D,
-    px: number,
-    py: number,
-    w: number,
-    h: number,
     gx: number,
-    gy: number
+    gy: number,
+    cx: number,
+    cy: number,
+    lift: number,
+    t: TerrainType,
+    burning: boolean,
+    burned: boolean,
+    lod: number
   ): void {
-    // Red-orange flame background
-    ctx.fillStyle = COLORS.BURNING_OUTER;
-    ctx.fillRect(px, py, w, h);
+    const isWater = t === TerrainType.WATER && !burned;
+    const topLift = isWater ? lift - 3 : lift;
 
-    // Animated dancing flame tongues
-    const flicker = Math.sin(this.animTick * 0.3 + gx * 2.1 + gy * 1.7) * 2;
-    ctx.fillStyle = COLORS.BURNING_MID;
+    // Колір верхньої грані з легкою строкатістю та підсвіткою пагорба
+    let f = 0.94 + Math.floor(rnd(gx, gy, 1) * 7) * 0.02;
+    f *= 1 + Math.min(0.2, lift * 0.012);
+    f = Math.round(f * 50) / 50;
+    let top = shade(burned ? '#2a2522' : this.groundColor(t), burned ? 1 : f);
+    if (burning) top = shade(this.groundColor(t), 0.6);
+
+    this.drawBlock(ctx, cx, cy, lift, topLift, top);
+
+    const bx = cx;
+    const by = cy + TH / 2 - topLift; // центр верхньої грані
+
+    if (burned) {
+      this.drawBurnedDecor(ctx, bx, by, gx, gy, t, lod);
+      return;
+    }
+
+    switch (t) {
+      case TerrainType.FOREST:
+        this.drawForest(ctx, bx, by, gx, gy, lod, burning);
+        break;
+      case TerrainType.BUSHES:
+        this.drawBushes(ctx, bx, by, gx, gy, lod);
+        break;
+      case TerrainType.HOUSES:
+        this.drawHouse(ctx, bx, by, false);
+        break;
+      case TerrainType.WATER:
+        this.drawWater(ctx, bx, by, gx, gy, lod);
+        break;
+      case TerrainType.WET_GROUND:
+        this.drawWetGround(ctx, bx, by, gx, gy);
+        break;
+      case TerrainType.ROAD:
+        this.drawRoad(ctx, bx, by, lod);
+        break;
+      case TerrainType.FIREBREAK:
+        this.drawFirebreak(ctx, bx, by);
+        break;
+      default:
+        this.drawGrass(ctx, bx, by, gx, gy, lod);
+        break;
+    }
+
+    if (burning) {
+      // Розжарена підсвітка землі під полум'ям
+      ctx.fillStyle = 'rgba(255, 90, 0, 0.3)';
+      this.diamond(ctx, bx, by, 1);
+      ctx.fill();
+    }
+  }
+
+  /** Ромб із центром (cx,cy) і масштабом k відносно клітинки. */
+  private diamond(ctx: CanvasRenderingContext2D, cx: number, cy: number, k: number): void {
     ctx.beginPath();
-    ctx.arc(px + w * 0.5, py + h * 0.6 + flicker * 0.5, w * 0.35, 0, Math.PI * 2);
+    ctx.moveTo(cx, cy - (TH / 2) * k);
+    ctx.lineTo(cx + (TW / 2) * k, cy);
+    ctx.lineTo(cx, cy + (TH / 2) * k);
+    ctx.lineTo(cx - (TW / 2) * k, cy);
+    ctx.closePath();
+  }
+
+  private drawBlock(
+    ctx: CanvasRenderingContext2D,
+    cx: number,
+    cy: number,
+    lift: number,
+    topLift: number,
+    top: string
+  ): void {
+    const depth = THICK + lift;
+    const y0 = cy - lift;
+
+    ctx.fillStyle = SIDE_L;
+    ctx.beginPath();
+    ctx.moveTo(cx - TW / 2, y0 + TH / 2);
+    ctx.lineTo(cx, y0 + TH);
+    ctx.lineTo(cx, y0 + TH + depth);
+    ctx.lineTo(cx - TW / 2, y0 + TH / 2 + depth);
+    ctx.closePath();
     ctx.fill();
 
-    // Hot yellow core
-    ctx.fillStyle = COLORS.BURNING_CORE;
+    ctx.fillStyle = SIDE_R;
     ctx.beginPath();
-    ctx.arc(px + w * 0.5, py + h * 0.65, w * 0.2, 0, Math.PI * 2);
+    ctx.moveTo(cx + TW / 2, y0 + TH / 2);
+    ctx.lineTo(cx, y0 + TH);
+    ctx.lineTo(cx, y0 + TH + depth);
+    ctx.lineTo(cx + TW / 2, y0 + TH / 2 + depth);
+    ctx.closePath();
+    ctx.fill();
+
+    const ty = cy - topLift;
+    ctx.fillStyle = top;
+    ctx.beginPath();
+    ctx.moveTo(cx, ty);
+    ctx.lineTo(cx + TW / 2, ty + TH / 2);
+    ctx.lineTo(cx, ty + TH);
+    ctx.lineTo(cx - TW / 2, ty + TH / 2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.10)';
+    ctx.lineWidth = 0.7;
+    ctx.stroke();
+  }
+
+  // ---- Ландшафт -----------------------------------------------------------
+
+  private drawGrass(ctx: CanvasRenderingContext2D, bx: number, by: number, gx: number, gy: number, lod: number): void {
+    if (lod < 2) return;
+    ctx.strokeStyle = '#a5d36a';
+    ctx.lineWidth = 0.9;
+    ctx.beginPath();
+    for (let i = 0; i < 4; i++) {
+      const ax = 0.15 + rnd(gx, gy, 60 + i) * 0.7;
+      const ay = 0.15 + rnd(gx, gy, 70 + i) * 0.7;
+      const px = bx + ((ax - ay) * TW) / 2;
+      const py = by - TH / 2 + ((ax + ay) * TH) / 2;
+      ctx.moveTo(px, py);
+      ctx.lineTo(px - 1, py - 3);
+      ctx.moveTo(px, py);
+      ctx.lineTo(px + 1.5, py - 3.5);
+    }
+    ctx.stroke();
+  }
+
+  private drawForest(
+    ctx: CanvasRenderingContext2D,
+    bx: number,
+    by: number,
+    gx: number,
+    gy: number,
+    lod: number,
+    burning: boolean
+  ): void {
+    const count = lod === 0 ? 1 : lod === 1 ? 2 : 3;
+    const pts: Array<{ ax: number; ay: number; k: number }> = [];
+    for (let i = 0; i < count; i++) {
+      const base = count === 1 ? 0.5 : 0.28 + (0.44 * i) / Math.max(1, count - 1);
+      pts.push({
+        ax: clamp(base + (rnd(gx, gy, 80 + i) - 0.5) * 0.35, 0.18, 0.82),
+        ay: clamp(base + (rnd(gx, gy, 90 + i) - 0.5) * 0.5, 0.18, 0.82),
+        k: i,
+      });
+    }
+    pts.sort((a, b) => a.ax + a.ay - (b.ax + b.ay));
+    for (const p of pts) {
+      const sx = bx + ((p.ax - p.ay) * TW) / 2;
+      const sy = by - TH / 2 + ((p.ax + p.ay) * TH) / 2;
+      this.drawPine(ctx, sx, sy, gx, gy, p.k, lod, burning);
+    }
+  }
+
+  private drawPine(
+    ctx: CanvasRenderingContext2D,
+    sx: number,
+    sy: number,
+    gx: number,
+    gy: number,
+    k: number,
+    lod: number,
+    burning: boolean
+  ): void {
+    const H = (lod === 0 ? 34 : 28) + rnd(gx, gy, 100 + k) * 8;
+    const sway = lod >= 1 ? Math.sin(this.animTick * 0.04 + gx * 0.7 + gy * 0.5 + k) * 1.2 : 0;
+    const dark = burning ? '#2a3a22' : '#1f6b2a';
+    const light = burning ? '#3a4a2c' : '#2f8a3a';
+
+    if (lod >= 2) {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+      ctx.beginPath();
+      ctx.ellipse(sx + 4, sy + 1, 9, 3.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.fillStyle = '#4e342e';
+    ctx.fillRect(sx - 1.6, sy - 5, 3.2, 6);
+
+    const layers = lod === 0 ? 2 : 3;
+    for (let i = 0; i < layers; i++) {
+      const w = 12 * (1 - i * 0.27);
+      const baseY = sy - 4 - i * (H * 0.27);
+      const tipY = baseY - H * 0.5;
+      const tipX = sx + sway * (1 + i * 0.4);
+      ctx.fillStyle = dark;
+      ctx.beginPath();
+      ctx.moveTo(sx - w, baseY);
+      ctx.lineTo(sx + w, baseY);
+      ctx.lineTo(tipX, tipY);
+      ctx.closePath();
+      ctx.fill();
+      if (lod >= 1) {
+        ctx.fillStyle = light;
+        ctx.beginPath();
+        ctx.moveTo(sx - w, baseY);
+        ctx.lineTo(sx, baseY);
+        ctx.lineTo(tipX, tipY);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+  }
+
+  private drawBushes(ctx: CanvasRenderingContext2D, bx: number, by: number, gx: number, gy: number, lod: number): void {
+    const n = lod === 0 ? 2 : 3;
+    for (let i = 0; i < n; i++) {
+      const ox = (rnd(gx, gy, 110 + i) - 0.5) * 26;
+      const oy = (rnd(gx, gy, 120 + i) - 0.5) * 8;
+      const r = 6 + rnd(gx, gy, 130 + i) * 3;
+      ctx.fillStyle = '#6f7a1f';
+      ctx.beginPath();
+      ctx.ellipse(bx + ox, by + oy + 1, r + 1, r * 0.55, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#a4b03a';
+      ctx.beginPath();
+      ctx.ellipse(bx + ox - 1, by + oy - 2, r, r * 0.8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      if (lod >= 2) {
+        ctx.fillStyle = '#c0ca55';
+        ctx.beginPath();
+        ctx.arc(bx + ox - 2.5, by + oy - 4, 1.8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  private drawWater(ctx: CanvasRenderingContext2D, bx: number, by: number, gx: number, gy: number, lod: number): void {
+    if (lod === 0) return;
+    ctx.strokeStyle = 'rgba(191, 230, 251, 0.75)';
+    ctx.lineWidth = 1;
+    const wave = Math.sin(this.animTick * 0.06 + gx * 0.9 + gy * 0.6);
+    ctx.beginPath();
+    ctx.moveTo(bx - 12 + wave * 2, by - 2);
+    ctx.lineTo(bx - 2 + wave * 2, by - 2);
+    ctx.moveTo(bx + 2 - wave * 2, by + 3);
+    ctx.lineTo(bx + 12 - wave * 2, by + 3);
+    ctx.stroke();
+  }
+
+  private drawWetGround(ctx: CanvasRenderingContext2D, bx: number, by: number, gx: number, gy: number): void {
+    ctx.fillStyle = '#8d6e63';
+    this.diamond(ctx, bx, by, 0.7);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(129, 212, 250, 0.45)';
+    ctx.beginPath();
+    ctx.ellipse(bx - 6 + rnd(gx, gy, 140) * 4, by - 1, 3.5, 1.6, 0, 0, Math.PI * 2);
+    ctx.ellipse(bx + 7, by + 2, 2.5, 1.2, 0, 0, Math.PI * 2);
     ctx.fill();
   }
 
-  private drawBurnedCell(
-    ctx: CanvasRenderingContext2D,
-    px: number,
-    py: number,
-    w: number,
-    h: number,
-    origTerrain: TerrainType
-  ): void {
-    ctx.fillStyle = COLORS.BURNED;
-    ctx.fillRect(px, py, w, h);
+  private drawRoad(ctx: CanvasRenderingContext2D, bx: number, by: number, lod: number): void {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+    this.diamond(ctx, bx, by, 0.72);
+    ctx.fill();
+    if (lod >= 1) {
+      ctx.strokeStyle = 'rgba(255, 224, 130, 0.55)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(bx - TW / 4 + 4, by - TH / 4 + 2);
+      ctx.lineTo(bx + TW / 4 - 4, by + TH / 4 - 2);
+      ctx.stroke();
+    }
+  }
 
-    // Ash and charcoal texture
-    ctx.fillStyle = COLORS.BURNED_ASH;
-    ctx.fillRect(px + w * 0.2, py + h * 0.3, w * 0.6, h * 0.15);
-    ctx.fillRect(px + w * 0.35, py + h * 0.6, w * 0.4, h * 0.15);
+  private drawFirebreak(ctx: CanvasRenderingContext2D, bx: number, by: number): void {
+    ctx.strokeStyle = '#a1887f';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    for (const a of [0.3, 0.5, 0.7]) {
+      const p0x = bx + ((0.15 - a) * TW) / 2;
+      const p0y = by - TH / 2 + ((0.15 + a) * TH) / 2;
+      const p1x = bx + ((0.85 - a) * TW) / 2;
+      const p1y = by - TH / 2 + ((0.85 + a) * TH) / 2;
+      ctx.moveTo(p0x, p0y);
+      ctx.lineTo(p1x, p1y);
+    }
+    ctx.stroke();
+  }
 
-    if (origTerrain === TerrainType.HOUSES) {
-      // Burnt house ruins
+  // ---- Будівлі --------------------------------------------------------------
+
+  private poly(ctx: CanvasRenderingContext2D, pts: Array<[number, number]>, fill: string): void {
+    ctx.fillStyle = fill;
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  private drawHouse(ctx: CanvasRenderingContext2D, bx: number, by: number, ruin: boolean): void {
+    const h = 0.3;
+    const wallH = ruin ? 4 : 13;
+    const roofH = 12;
+    const P = (ax: number, ay: number, zz: number): [number, number] => [
+      bx + ((ax - ay) * TW) / 2,
+      by + ((ax + ay) * TH) / 2 - zz,
+    ];
+
+    const L0 = P(-h, h, 0);
+    const B0 = P(h, h, 0);
+    const R0 = P(h, -h, 0);
+    const L1 = P(-h, h, wallH);
+    const B1 = P(h, h, wallH);
+    const R1 = P(h, -h, wallH);
+
+    // тінь
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+    ctx.beginPath();
+    ctx.ellipse(bx + 3, by + 3, 17, 7, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    this.poly(ctx, [L0, B0, B1, L1], ruin ? '#4a3a32' : '#eadfca');
+    this.poly(ctx, [B0, R0, R1, B1], ruin ? '#33271f' : '#cdbfa6');
+
+    if (ruin) {
       ctx.strokeStyle = '#e57373';
       ctx.lineWidth = 1;
-      ctx.strokeRect(px + w * 0.25, py + h * 0.35, w * 0.5, h * 0.4);
+      ctx.beginPath();
+      ctx.moveTo(L1[0], L1[1]);
+      ctx.lineTo(B1[0], B1[1]);
+      ctx.lineTo(R1[0], R1[1]);
+      ctx.stroke();
+      return;
+    }
+
+    // вікно на лівій стіні
+    const w0 = P(-h + 2 * h * 0.35, h, 4);
+    const w1 = P(-h + 2 * h * 0.65, h, 4);
+    const w2 = P(-h + 2 * h * 0.65, h, 9);
+    const w3 = P(-h + 2 * h * 0.35, h, 9);
+    this.poly(ctx, [w0, w1, w2, w3], '#fff59d');
+
+    // дах (чотирисхилий)
+    const o = 1.18;
+    const L1o = P(-h * o, h * o, wallH);
+    const B1o = P(h * o, h * o, wallH);
+    const R1o = P(h * o, -h * o, wallH);
+    const A = P(0, 0, wallH + roofH);
+    this.poly(ctx, [L1o, B1o, A], '#d03232');
+    this.poly(ctx, [B1o, R1o, A], '#a82222');
+  }
+
+  private drawTower(ctx: CanvasRenderingContext2D, sx: number, sy: number): void {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+    ctx.beginPath();
+    ctx.ellipse(sx + 3, sy + 2, 12, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = '#5d4037';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(sx - 10, sy + 3);
+    ctx.lineTo(sx - 5, sy - 30);
+    ctx.moveTo(sx + 10, sy + 3);
+    ctx.lineTo(sx + 5, sy - 30);
+    ctx.moveTo(sx - 8, sy - 6);
+    ctx.lineTo(sx + 7, sy - 20);
+    ctx.moveTo(sx + 8, sy - 6);
+    ctx.lineTo(sx - 7, sy - 20);
+    ctx.stroke();
+
+    ctx.fillStyle = '#6d4c41';
+    ctx.fillRect(sx - 9, sy - 35, 18, 5);
+
+    ctx.fillStyle = '#00acc1';
+    ctx.fillRect(sx - 6, sy - 48, 12, 13);
+    ctx.fillStyle = '#4dd0e1';
+    ctx.beginPath();
+    ctx.ellipse(sx, sy - 48, 6, 2.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+  }
+
+  // ---- Згарище, вогонь, дим ----------------------------------------------
+
+  private drawBurnedDecor(
+    ctx: CanvasRenderingContext2D,
+    bx: number,
+    by: number,
+    gx: number,
+    gy: number,
+    orig: TerrainType,
+    lod: number
+  ): void {
+    ctx.fillStyle = '#4a4440';
+    ctx.beginPath();
+    ctx.ellipse(bx - 8, by - 1, 7, 2.5, 0, 0, Math.PI * 2);
+    ctx.ellipse(bx + 6, by + 3, 5, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (orig === TerrainType.HOUSES) {
+      this.drawHouse(ctx, bx, by, true);
+    } else if (orig === TerrainType.FOREST) {
+      ctx.strokeStyle = '#1a1512';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      const n = lod === 0 ? 1 : 2;
+      for (let i = 0; i < n; i++) {
+        const ox = (rnd(gx, gy, 150 + i) - 0.5) * 20;
+        ctx.moveTo(bx + ox, by + 2);
+        ctx.lineTo(bx + ox + 1, by - 10 - rnd(gx, gy, 160 + i) * 6);
+      }
+      ctx.stroke();
     }
   }
 
-  private drawTowerIcon(ctx: CanvasRenderingContext2D, cx: number, cy: number, cw: number): void {
-    const size = cw * 0.7;
-    // Tower base legs
-    ctx.strokeStyle = '#006064';
-    ctx.lineWidth = 2;
+  private drawFire(ctx: CanvasRenderingContext2D, sx: number, sy: number, gx: number, gy: number, lod: number): void {
+    const t = this.animTick;
+    ctx.fillStyle = 'rgba(255, 120, 20, 0.28)';
     ctx.beginPath();
-    ctx.moveTo(cx - size * 0.4, cy + size * 0.4);
-    ctx.lineTo(cx, cy - size * 0.4);
-    ctx.lineTo(cx + size * 0.4, cy + size * 0.4);
-    ctx.moveTo(cx - size * 0.3, cy + size * 0.1);
-    ctx.lineTo(cx + size * 0.3, cy + size * 0.1);
-    ctx.stroke();
-
-    // Water barrel / beacon platform at top
-    ctx.fillStyle = '#00bcd4';
-    ctx.beginPath();
-    ctx.arc(cx, cy - size * 0.4, size * 0.22, 0, Math.PI * 2);
+    ctx.ellipse(sx, sy, 26, 13, 0, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1;
-    ctx.stroke();
+
+    const n = lod === 0 ? 2 : 4;
+    for (let i = 0; i < n; i++) {
+      const ox = (rnd(gx, gy, 10 + i) - 0.5) * 26;
+      const oy = (rnd(gx, gy, 20 + i) - 0.5) * 10;
+      const ph = t * 0.22 + rnd(gx, gy, 30 + i) * 6.28;
+      const h = 18 + rnd(gx, gy, 40 + i) * 12 + Math.sin(ph) * 4;
+      const w = 7 + Math.sin(ph * 1.3) * 1.5;
+      this.flame(ctx, sx + ox, sy + oy, w, h, '#e8412c');
+      this.flame(ctx, sx + ox, sy + oy, w * 0.68, h * 0.72, '#ff9800');
+      this.flame(ctx, sx + ox, sy + oy, w * 0.36, h * 0.45, '#fff59d');
+    }
+  }
+
+  private flame(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, color: string): void {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(x - w, y);
+    ctx.quadraticCurveTo(x - w * 1.1, y - h * 0.55, x + Math.sin(this.animTick * 0.2 + x) * 2, y - h);
+    ctx.quadraticCurveTo(x + w * 1.1, y - h * 0.55, x + w, y);
+    ctx.quadraticCurveTo(x, y + w * 0.5, x - w, y);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  private drawSmoke(ctx: CanvasRenderingContext2D, fires: FireSpot[]): void {
+    for (const f of fires) {
+      for (let i = 0; i < 3; i++) {
+        const t = (this.animTick * 0.012 + rnd(f.gx, f.gy, 50 + i) + i / 3) % 1;
+        const r = 6 + t * 12;
+        const px = f.sx + Math.sin(t * 5 + i) * 6 + t * 14;
+        const py = f.sy - 22 - t * 55;
+        ctx.fillStyle = `rgba(55, 55, 55, ${(0.5 * (1 - t)).toFixed(3)})`;
+        ctx.beginPath();
+        ctx.arc(px, py, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
   }
 }

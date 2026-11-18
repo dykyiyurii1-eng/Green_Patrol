@@ -110,6 +110,7 @@ export class App {
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
     this.renderer = new CanvasRenderer(canvas);
+    this.createZoomControls();
 
     this.currentScenario = SCENARIOS[0];
     this.seed = this.currentScenario.seed;
@@ -138,6 +139,36 @@ export class App {
 
     // Start render loop
     this.startRenderLoop();
+  }
+
+  private createZoomControls(): void {
+    const host = this.canvas.parentElement;
+    if (!host) return;
+    if (getComputedStyle(host).position === 'static') {
+      host.style.position = 'relative';
+    }
+    const box = document.createElement('div');
+    box.style.cssText =
+      'position:absolute;right:12px;bottom:12px;display:flex;flex-direction:column;gap:6px;z-index:5;';
+    const add = (label: string, title: string, action: () => void): void => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = label;
+      b.title = title;
+      b.setAttribute('aria-label', title);
+      b.style.cssText =
+        'width:38px;height:38px;font:700 18px/1 sans-serif;color:#e8f5e9;' +
+        'background:rgba(18,48,31,0.92);border:2px solid #c9a24a;border-radius:8px;cursor:pointer;';
+      b.addEventListener('click', (e) => {
+        e.stopPropagation();
+        action();
+      });
+      box.appendChild(b);
+    };
+    add('+', 'Збільшити', () => this.renderer.zoomBy(1.3));
+    add('−', 'Зменшити', () => this.renderer.zoomBy(1 / 1.3));
+    add('⌂', 'Скинути вигляд', () => this.renderer.resetView());
+    host.appendChild(box);
   }
 
   private initDOMElements(): void {
@@ -340,6 +371,7 @@ export class App {
 
     // Canvas Mouse Interaction
     this.canvas.addEventListener('mousedown', (e) => {
+      if (e.button !== 0 || this.renderer.isPanGesture) return;
       this.isMouseDown = true;
       this.handleCanvasInteraction(e);
     });
@@ -378,22 +410,20 @@ export class App {
   }
 
   private handleTouchInteraction(touch: Touch): void {
-    const rect = this.canvas.getBoundingClientRect();
-    const clientX = touch.clientX - rect.left;
-    const clientY = touch.clientY - rect.top;
-    this.applyToolAtCanvasCoords(clientX, clientY, rect.width, rect.height);
+    this.applyToolAtClientCoords(touch.clientX, touch.clientY);
   }
 
   private handleCanvasInteraction(e: MouseEvent): void {
-    const rect = this.canvas.getBoundingClientRect();
-    const clientX = e.clientX - rect.left;
-    const clientY = e.clientY - rect.top;
-    this.applyToolAtCanvasCoords(clientX, clientY, rect.width, rect.height);
+    this.applyToolAtClientCoords(e.clientX, e.clientY);
   }
 
-  private applyToolAtCanvasCoords(cx: number, cy: number, w: number, h: number): void {
-    const cellX = Math.floor((cx / w) * this.grid.width);
-    const cellY = Math.floor((cy / h) * this.grid.height);
+  private applyToolAtClientCoords(clientX: number, clientY: number): void {
+    const cell = this.renderer.screenToCell(clientX, clientY);
+    if (!cell) {
+      return;
+    }
+    const cellX = cell.x;
+    const cellY = cell.y;
 
     if (!this.grid.inBounds(cellX, cellY)) {
       return;

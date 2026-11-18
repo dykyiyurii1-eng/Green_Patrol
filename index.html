@@ -20,14 +20,14 @@
       <div class="logo-area">
         <span class="logo-icon">🏡🔥🌲</span>
         <div class="logo-title">
-          <h1>Зелений Патруль (Green Patrol)</h1>
-          <p>Місія фермера: Врятуй селище від лісової пожежі • GENIUS Olympiad</p>
+          <h1>Зелений Патруль</h1>
+          <p>Місія фермера • GENIUS Olympiad</p>
         </div>
       </div>
 
       <div class="mode-switcher">
         <button id="mode-planning-btn" class="mode-btn active">
-          🛡️ Режим планування (Фермер)
+          🛡️ Планування
         </button>
         <button id="mode-sandbox-btn" class="mode-btn">
           🧪 Пісочниця
@@ -36,10 +36,170 @@
     </header>
 
     <main>
-      <!-- Simulation Canvas Viewport -->
+      <!-- Paint-style Compact Tool Dock (Right via CSS row-reverse) -->
+      <aside class="sidebar">
+        <!-- 1. Карта + згорнутий брифінг -->
+        <div class="dock-section">
+          <div class="map-row">
+            <select id="scenario-select" class="compact-select" title="Тактична карта фермера">
+              <option value="river-village">🌲 Річковий бір (30×30)</option>
+              <option value="dry-steppe-farm">🌾 Степовий хутір (30×30)</option>
+              <option value="hill-farmstead">⛰️ Пагорб із вітряком (30×30)</option>
+            </select>
+            <button
+              type="button"
+              class="icon-info-btn"
+              title="Умови місії"
+              onclick="document.getElementById('scenario-description').classList.toggle('hidden')"
+            >
+              ?
+            </button>
+          </div>
+          <p id="scenario-description" class="scenario-desc hidden">
+            На заході у лісовому масиві спалахнула пожежа. Помірний вітер жене вогонь через сухі кущі прямо до селища фермера на сході. Використайте річку з вологими берегами як природний бар’єр та створіть просіки, щоб захистити хатинки!
+          </p>
+        </div>
+
+        <!-- 2. Режим планування -->
+        <div id="planning-panel" class="dock-section">
+          <div class="budget-container">
+            <div class="control-label">
+              <span>Ресурси:</span>
+              <span id="budget-text" class="budget-val">0 / 50 балів</span>
+            </div>
+            <div class="budget-bar-bg">
+              <div id="budget-progress" class="budget-bar-fill"></div>
+            </div>
+          </div>
+
+          <div id="planning-error-msg" class="action-alert hidden"></div>
+
+          <div class="dock-label">Інструменти</div>
+          <div class="paint-grid">
+            <button id="tool-firebreak-btn" class="tool-tile active" title="Протипожежна смуга (2 бали)">
+              <span class="tile-cost">2 б</span>
+              <span class="tile-icon">🚧</span>
+              <span class="tile-name">Смуга</span>
+            </button>
+
+            <button id="tool-watchtower-btn" class="tool-tile" title="Водонапірна вежа (18 балів)">
+              <span class="tile-cost">18 б</span>
+              <span class="tile-icon">🗼</span>
+              <span class="tile-name">Вежа</span>
+            </button>
+
+            <button id="undo-btn" class="tool-tile" title="Скасувати останню дію">
+              <span class="tile-icon">↩️</span>
+              <span class="tile-name">Назад</span>
+            </button>
+
+            <button id="reset-plan-btn" class="tool-tile danger" title="Скинути весь план">
+              <span class="tile-icon">🔄</span>
+              <span class="tile-name">Скинути</span>
+            </button>
+          </div>
+
+          <button id="start-fire-btn" class="btn btn-primary launch-btn">
+            🚀 Запустити вогонь
+          </button>
+        </div>
+
+        <!-- 3. Режим пісочниці -->
+        <div id="sandbox-panel" class="dock-section hidden">
+          <div class="dock-label">Пензлі пісочниці</div>
+          <div class="paint-grid">
+            <button id="tool-ignite-btn" class="tool-tile active" title="Запалити клітинку">
+              <span class="tile-icon">🔥</span>
+              <span class="tile-name">Вогонь</span>
+            </button>
+            <button id="tool-sandbox-firebreak-btn" class="tool-tile" title="Протипожежна смуга">
+              <span class="tile-icon">🚧</span>
+              <span class="tile-name">Смуга</span>
+            </button>
+            <button id="tool-forest-btn" class="tool-tile" title="Посадити ліс">
+              <span class="tile-icon">🌲</span>
+              <span class="tile-name">Ліс</span>
+            </button>
+            <button id="tool-water-btn" class="tool-tile" title="Додати воду">
+              <span class="tile-icon">💧</span>
+              <span class="tile-name">Вода</span>
+            </button>
+          </div>
+
+          <div class="sandbox-controls">
+            <div class="control-row">
+              <div class="control-label">
+                <span>💨 Вітер:</span>
+                <span id="wind-speed-val">6.5 м/с</span>
+              </div>
+              <input id="wind-speed-slider" type="range" min="0" max="25" step="0.5" value="6.5" />
+            </div>
+
+            <div class="control-row">
+              <div class="control-label">
+                <span>🧭 Напрямок:</span>
+                <span id="wind-dir-val">90° (Схід)</span>
+              </div>
+              <div class="compass-container">
+                <input id="wind-dir-slider" type="range" min="0" max="355" step="5" value="90" />
+                <div class="compass-dial">
+                  <span id="compass-arrow" class="compass-needle" style="transform: rotate(90deg)">⬆️</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="control-row">
+              <div class="control-label">
+                <span>💧 Вологість:</span>
+                <span id="humidity-val">38%</span>
+              </div>
+              <input id="humidity-slider" type="range" min="0" max="100" step="1" value="38" />
+            </div>
+          </div>
+
+          <div class="sandbox-actions">
+            <button id="sandbox-play-btn" class="btn btn-primary">▶️ Старт</button>
+            <button id="sandbox-reset-btn" class="btn btn-icon-only" title="Скинути карту">🔄</button>
+          </div>
+        </div>
+
+        <!-- 4. Керування швидкістю -->
+        <div id="sim-controls-panel" class="dock-section hidden">
+          <div class="dock-label">Швидкість симуляції</div>
+          <div class="speed-strip">
+            <button id="play-pause-btn" class="btn speed-btn" title="Пауза / Продовжити">⏸️</button>
+            <button id="speed-1-btn" class="btn speed-btn active">1x</button>
+            <button id="speed-2-btn" class="btn speed-btn">2x</button>
+            <button id="speed-5-btn" class="btn speed-btn">5x</button>
+            <button id="step-btn" class="btn speed-btn" title="1 крок вперед">⏭️</button>
+          </div>
+        </div>
+
+        <!-- 5. Компактна телеметрія -->
+        <div class="dock-section telemetry-panel">
+          <div class="tele-row highlight">
+            <span>🏡 Селище</span>
+            <span id="stat-village" class="stat-value village-saved">10 / 10 (100%)</span>
+          </div>
+          <div class="tele-row">
+            <span>🌲 Ліс</span>
+            <span id="stat-saved" class="stat-value">100.0%</span>
+          </div>
+          <div class="tele-row">
+            <span>🔥 Горить</span>
+            <span id="stat-burning" class="stat-value burning">0</span>
+          </div>
+          <div class="tele-row">
+            <span>⬛ Згарище</span>
+            <span id="stat-burned" class="stat-value burned">0</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Simulation Canvas Viewport (Expanded Left / Center) -->
       <section class="viewport-container">
         <div class="canvas-wrapper">
-          <canvas id="sim-canvas" width="600" height="600"></canvas>
+          <canvas id="sim-canvas" width="950" height="750"></canvas>
         </div>
 
         <div class="canvas-legend">
@@ -53,7 +213,7 @@
           </div>
           <div class="legend-item">
             <span class="legend-color" style="background: #c62828"></span>
-            <span>🏡 Селище (Хатинки)</span>
+            <span>🏡 Селище</span>
           </div>
           <div class="legend-item">
             <span class="legend-color" style="background: #0288d1"></span>
@@ -61,11 +221,11 @@
           </div>
           <div class="legend-item">
             <span class="legend-color" style="background: #5d4037"></span>
-            <span>🏖️ Мокрий берег (не горить)</span>
+            <span>🏖️ Берег</span>
           </div>
           <div class="legend-item">
             <span class="legend-color" style="background: #d7ccc8"></span>
-            <span>🚧 Смуга (2 б)</span>
+            <span> Смуга (2 б)</span>
           </div>
           <div class="legend-item">
             <span class="legend-color" style="background: #00bcd4"></span>
@@ -81,163 +241,6 @@
           </div>
         </div>
       </section>
-
-      <!-- Sidebar Controls -->
-      <aside class="sidebar">
-        <!-- Scenario Selector Card -->
-        <div class="card">
-          <div class="card-title">📍 Тактична карта фермера</div>
-          <div class="scenario-select-wrapper">
-            <select id="scenario-select">
-              <option value="river-village">Рідне селище та річковий бір (30×30)</option>
-              <option value="dry-steppe-farm">Сухий степовий хутір (30×30)</option>
-              <option value="hill-farmstead">Пагорб із садибою та вітряком (30×30)</option>
-            </select>
-          </div>
-          <p id="scenario-description" class="scenario-desc">
-            На заході у лісовому масиві спалахнула пожежа. Помірний вітер жене вогонь через сухі кущі прямо до селища фермера на сході. Використайте річку з вологими берегами як природний бар’єр та створіть просіки, щоб захистити хатинки!
-          </p>
-        </div>
-
-        <!-- Planning Mode Controls -->
-        <div id="planning-panel" class="card">
-          <div class="card-title">🛡️ Підготовка: Ресурси фермера</div>
-
-          <div class="budget-container">
-            <div class="control-label">
-              <span>Запас часу та ресурсів:</span>
-              <span id="budget-text">0 / 50 балів</span>
-            </div>
-            <div class="budget-bar-bg">
-              <div id="budget-progress" class="budget-bar-fill"></div>
-            </div>
-          </div>
-
-          <div id="planning-error-msg" class="action-alert hidden"></div>
-
-          <div class="btn-group">
-            <button id="tool-firebreak-btn" class="btn active">
-              🚧 Протипожежна смуга (2 б)
-            </button>
-            <button id="tool-watchtower-btn" class="btn">
-              🗼 Водонапірна вежа (18 б)
-            </button>
-            <button id="undo-btn" class="btn">
-              ↩️ Скасувати
-            </button>
-            <button id="reset-plan-btn" class="btn">
-              🔄 Скинути план
-            </button>
-          </div>
-
-          <button id="start-fire-btn" class="btn btn-primary">
-            🚀 Розпочати симуляцію пожежі
-          </button>
-        </div>
-
-        <!-- Sandbox Mode Controls -->
-        <div id="sandbox-panel" class="card hidden">
-          <div class="card-title">🧪 Інструменти пісочниці</div>
-
-          <div class="btn-group">
-            <button id="tool-ignite-btn" class="btn active">
-              🔥 Запалити
-            </button>
-            <button id="tool-sandbox-firebreak-btn" class="btn">
-              🚧 Смуга
-            </button>
-            <button id="tool-forest-btn" class="btn">
-              🌲 Ліс
-            </button>
-            <button id="tool-water-btn" class="btn">
-              💧 Вода
-            </button>
-          </div>
-
-          <div class="control-row">
-            <div class="control-label">
-              <span>Швидкість вітру:</span>
-              <span id="wind-speed-val">6.5 м/с</span>
-            </div>
-            <input id="wind-speed-slider" type="range" min="0" max="25" step="0.5" value="6.5" />
-          </div>
-
-          <div class="control-row">
-            <div class="control-label">
-              <span>Напрямок вітру:</span>
-              <span id="wind-dir-val">90° (Схід)</span>
-            </div>
-            <div class="compass-container">
-              <input id="wind-dir-slider" type="range" min="0" max="355" step="5" value="90" />
-              <div class="compass-dial">
-                <span id="compass-arrow" class="compass-needle" style="transform: rotate(90deg)">⬆️</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="control-row">
-            <div class="control-label">
-              <span>Відносна вологість:</span>
-              <span id="humidity-val">38%</span>
-            </div>
-            <input id="humidity-slider" type="range" min="0" max="100" step="1" value="38" />
-          </div>
-
-          <div class="btn-group">
-            <button id="sandbox-play-btn" class="btn btn-primary">
-              ▶️ Старт
-            </button>
-            <button id="sandbox-reset-btn" class="btn">
-              🔄 Скинути
-            </button>
-          </div>
-        </div>
-
-        <!-- Simulation Execution Controls -->
-        <div id="sim-controls-panel" class="card hidden">
-          <div class="card-title">⏱️ Керування швидкістю симуляції</div>
-          <div class="btn-group">
-            <button id="play-pause-btn" class="btn">
-              ⏸️ Пауза
-            </button>
-            <button id="speed-1-btn" class="btn active">
-              1x
-            </button>
-            <button id="speed-2-btn" class="btn">
-              2x
-            </button>
-            <button id="speed-5-btn" class="btn">
-              5x
-            </button>
-            <button id="step-btn" class="btn">
-              ⏭️ 1 крок
-            </button>
-          </div>
-        </div>
-
-        <!-- Real-time Statistics Card -->
-        <div class="card">
-          <div class="card-title">📊 Стан оборони селища</div>
-          <div class="stats-grid">
-            <div class="stat-box highlight-box">
-              <div class="stat-label">Хатинок селища вціліло</div>
-              <div id="stat-village" class="stat-value village-saved">10 / 10 (100%)</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-label">Врятовано лісу</div>
-              <div id="stat-saved" class="stat-value">100.0%</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-label">Горить клітинок</div>
-              <div id="stat-burning" class="stat-value burning">0</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-label">Згарище (вигоріло)</div>
-              <div id="stat-burned" class="stat-value burned">0</div>
-            </div>
-          </div>
-        </div>
-      </aside>
     </main>
 
     <!-- Results Modal (Phase 3 of Planning Mode) -->
@@ -247,7 +250,7 @@
 
         <div class="modal-metrics">
           <div class="modal-metric-row highlight-row">
-            <span>🏡 Хатинки селища фермера:</span>
+            <span> Хатинки селища фермера:</span>
             <span id="result-village-val" class="metric-val positive">10 / 10 (100% врятовано)</span>
           </div>
           <div class="modal-metric-row">
@@ -263,7 +266,7 @@
             <span id="result-diff-val" class="metric-val positive">+55.0%</span>
           </div>
           <div class="modal-metric-row">
-            <span>⏳ Використано ресурсів часу:</span>
+            <span> Використано ресурсів часу:</span>
             <span id="result-budget-val" class="metric-val">46 / 50 балів</span>
           </div>
         </div>
