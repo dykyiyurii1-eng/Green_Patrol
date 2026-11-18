@@ -15,14 +15,11 @@ export interface BaselineResult {
   ticks: number;
 }
 
-<<<<<<< HEAD
-=======
 /**
  * Runs a deterministic simulation from the unmodified scenario grid (without any player actions)
  * using the exact same random seed and environment.
  * Provides the objective benchmark to measure player strategy and village defense.
  */
->>>>>>> feat/yurii-ui
 export function runBaselineSimulation(
   cleanGrid: SimulationGrid,
   env: EnvironmentState,

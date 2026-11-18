@@ -45,10 +45,7 @@ export class PlanningManager {
     const idx = this.grid.getIndex(x, y);
     const currentTerrain = this.grid.terrain[idx];
 
-<<<<<<< HEAD
-=======
     // Cannot build on water, wet ground, roads or houses
->>>>>>> feat/yurii-ui
     if (
       currentTerrain === TerrainType.WATER ||
       currentTerrain === TerrainType.WET_GROUND ||
@@ -59,10 +56,7 @@ export class PlanningManager {
       return false;
     }
 
-<<<<<<< HEAD
-=======
     // Heat & smoke danger zone check: cannot cheese by walling fire at point blank range
->>>>>>> feat/yurii-ui
     if (this.grid.isNearActiveFire(x, y, heatRadius)) {
       this.lastErrorMessage =
         'Занадто близько до полум’я! Спека та їдкий дим не дозволяють працювати впритул до вогню.';

@@ -50,10 +50,7 @@ describe('Wildfire Simulation Core Tests (30x30 Tactical Grid)', () => {
       simulationStep(grid, defaultEnv, rng);
     }
 
-<<<<<<< HEAD
-=======
     // Verify wet ground/sand cells around burning source never ignite
->>>>>>> feat/yurii-ui
     for (let i = 0; i < grid.size; i++) {
       if (i !== centerIdx) {
         expect(grid.state[i]).toBe(CellState.UNBURNED);
@@ -95,11 +92,7 @@ describe('Wildfire Simulation Core Tests (30x30 Tactical Grid)', () => {
 
       const env: EnvironmentState = {
         windSpeed,
-<<<<<<< HEAD
-        windDirectionDeg: 90,
-=======
         windDirectionDeg: 90, // Blowing East
->>>>>>> feat/yurii-ui
         humidity: 50,
       };
 
@@ -133,10 +126,7 @@ describe('Wildfire Simulation Core Tests (30x30 Tactical Grid)', () => {
     const grid = new SimulationGrid(20, 20);
     grid.terrain.fill(TerrainType.FOREST);
 
-<<<<<<< HEAD
-=======
     // Build vertical firebreak line at x = 10
->>>>>>> feat/yurii-ui
     for (let y = 0; y < grid.height; y++) {
       grid.terrain[grid.getIndex(10, y)] = TerrainType.FIREBREAK;
     }
@@ -249,10 +239,7 @@ describe('Wildfire Simulation Core Tests (30x30 Tactical Grid)', () => {
     const grid = new SimulationGrid(15, 15);
     grid.terrain.fill(TerrainType.FOREST);
 
-<<<<<<< HEAD
-=======
     // Ignite fire at (5, 5)
->>>>>>> feat/yurii-ui
     grid.state[grid.getIndex(5, 5)] = CellState.BURNING;
 
     const budget = {
@@ -263,17 +250,11 @@ describe('Wildfire Simulation Core Tests (30x30 Tactical Grid)', () => {
 
     const planner = new PlanningManager(grid, budget);
 
-<<<<<<< HEAD
-    expect(planner.placeFirebreak(5, 6)).toBe(false);
-    expect(planner.lastErrorMessage).toContain('Занадто близько до полум’я');
-
-=======
     // Heat danger radius is 2: placing at (5, 6) or (6, 5) or (7, 5) must be rejected
     expect(planner.placeFirebreak(5, 6)).toBe(false);
     expect(planner.lastErrorMessage).toContain('Занадто близько до полум’я');
 
     // Placing outside danger radius (e.g. distance > 2: at x=5, y=9) must be allowed
->>>>>>> feat/yurii-ui
     expect(planner.placeFirebreak(5, 9)).toBe(true);
   });
 });

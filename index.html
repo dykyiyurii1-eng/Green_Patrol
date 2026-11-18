@@ -7,38 +7,18 @@
     <link rel="stylesheet" href="./src/ui/style.css" />
   </head>
   <body>
-<<<<<<< HEAD
-    <div id="main-menu-overlay" class="main-menu-screen">
-      <div class="main-menu-card">
-        <img src="./img_icon/Copy of Templates (new), копія.png" alt="Зелений Патруль" class="main-menu-logo" />
-        <h1 class="main-menu-title">Зелений Патруль</h1>
-        <p class="main-menu-subtitle">Захистіть селище від лісової пожежі • GENIUS Olympiad</p>
-        <button id="main-menu-play-btn" class="main-menu-play-btn">Грати</button>
-      </div>
-    </div>
-
-=======
     <!-- Cinematic Typewriter Intro Screen -->
->>>>>>> feat/yurii-ui
     <div id="intro-overlay" class="intro-screen">
       <div class="intro-content">
         <div id="intro-line-1" class="intro-line"></div>
         <div id="intro-line-2" class="intro-line highlight"></div>
-<<<<<<< HEAD
-        <button id="skip-intro-btn" class="skip-btn">Пропустити</button>
-=======
         <button id="skip-intro-btn" class="skip-btn">Пропустити ➔</button>
->>>>>>> feat/yurii-ui
       </div>
     </div>
 
     <header>
       <div class="logo-area">
-<<<<<<< HEAD
         <img src="./img_icon/Copy of Templates (new), копія.png" alt="Зелений Патруль" class="logo-icon" />
-=======
-        <span class="logo-icon">🏡🔥🌲</span>
->>>>>>> feat/yurii-ui
         <div class="logo-title">
           <h1>Зелений Патруль</h1>
           <p>Місія фермера • GENIUS Olympiad</p>
@@ -47,28 +27,18 @@
 
       <div class="mode-switcher">
         <button id="mode-planning-btn" class="mode-btn active">
-<<<<<<< HEAD
-          Планування
-=======
           🛡️ Планування
->>>>>>> feat/yurii-ui
         </button>
         <button id="mode-sandbox-btn" class="mode-btn">
-          Пісочниця
+          🧪 Пісочниця
+        </button>
+        <button id="mode-survival-btn" class="mode-btn">
+          🏃 Виживання
         </button>
       </div>
     </header>
 
     <main>
-<<<<<<< HEAD
-      <aside class="sidebar">
-        <div class="dock-section">
-          <div class="map-row">
-            <select id="scenario-select" class="compact-select" title="Тактична карта фермера">
-              <option value="river-village">Річковий бір (30×30)</option>
-              <option value="dry-steppe-farm">Степовий хутір (30×30)</option>
-              <option value="hill-farmstead">Пагорб із вітряком (30×30)</option>
-=======
       <!-- Paint-style Compact Tool Dock (Right via CSS row-reverse) -->
       <aside class="sidebar">
         <!-- 1. Карта + згорнутий брифінг -->
@@ -78,7 +48,6 @@
               <option value="river-village">🌲 Річковий бір (30×30)</option>
               <option value="dry-steppe-farm">🌾 Степовий хутір (30×30)</option>
               <option value="hill-farmstead">⛰️ Пагорб із вітряком (30×30)</option>
->>>>>>> feat/yurii-ui
             </select>
             <button
               type="button"
@@ -94,10 +63,7 @@
           </p>
         </div>
 
-<<<<<<< HEAD
-=======
         <!-- 2. Режим планування -->
->>>>>>> feat/yurii-ui
         <div id="planning-panel" class="dock-section">
           <div class="budget-container">
             <div class="control-label">
@@ -115,67 +81,37 @@
           <div class="paint-grid">
             <button id="tool-firebreak-btn" class="tool-tile active" title="Протипожежна смуга (2 бали)">
               <span class="tile-cost">2 б</span>
-<<<<<<< HEAD
-=======
               <span class="tile-icon">🚧</span>
->>>>>>> feat/yurii-ui
               <span class="tile-name">Смуга</span>
             </button>
 
             <button id="tool-watchtower-btn" class="tool-tile" title="Водонапірна вежа (18 балів)">
               <span class="tile-cost">18 б</span>
-<<<<<<< HEAD
-=======
               <span class="tile-icon">🗼</span>
->>>>>>> feat/yurii-ui
               <span class="tile-name">Вежа</span>
             </button>
 
             <button id="undo-btn" class="tool-tile" title="Скасувати останню дію">
-<<<<<<< HEAD
-=======
               <span class="tile-icon">↩️</span>
->>>>>>> feat/yurii-ui
               <span class="tile-name">Назад</span>
             </button>
 
             <button id="reset-plan-btn" class="tool-tile danger" title="Скинути весь план">
-<<<<<<< HEAD
-=======
               <span class="tile-icon">🔄</span>
->>>>>>> feat/yurii-ui
               <span class="tile-name">Скинути</span>
             </button>
           </div>
 
           <button id="start-fire-btn" class="btn btn-primary launch-btn">
-<<<<<<< HEAD
-            Запустити вогонь
-          </button>
-        </div>
-
-=======
             🚀 Запустити вогонь
           </button>
         </div>
 
         <!-- 3. Режим пісочниці -->
->>>>>>> feat/yurii-ui
         <div id="sandbox-panel" class="dock-section hidden">
           <div class="dock-label">Пензлі пісочниці</div>
           <div class="paint-grid">
             <button id="tool-ignite-btn" class="tool-tile active" title="Запалити клітинку">
-<<<<<<< HEAD
-              <span class="tile-name">Вогонь</span>
-            </button>
-            <button id="tool-sandbox-firebreak-btn" class="tool-tile" title="Протипожежна смуга">
-              <span class="tile-name">Смуга</span>
-            </button>
-            <button id="tool-forest-btn" class="tool-tile" title="Посадити ліс">
-              <span class="tile-name">Ліс</span>
-            </button>
-            <button id="tool-water-btn" class="tool-tile" title="Додати воду">
-=======
               <span class="tile-icon">🔥</span>
               <span class="tile-name">Вогонь</span>
             </button>
@@ -189,7 +125,6 @@
             </button>
             <button id="tool-water-btn" class="tool-tile" title="Додати воду">
               <span class="tile-icon">💧</span>
->>>>>>> feat/yurii-ui
               <span class="tile-name">Вода</span>
             </button>
           </div>
@@ -197,11 +132,7 @@
           <div class="sandbox-controls">
             <div class="control-row">
               <div class="control-label">
-<<<<<<< HEAD
-                <span>Вітер:</span>
-=======
                 <span>💨 Вітер:</span>
->>>>>>> feat/yurii-ui
                 <span id="wind-speed-val">6.5 м/с</span>
               </div>
               <input id="wind-speed-slider" type="range" min="0" max="25" step="0.5" value="6.5" />
@@ -209,32 +140,20 @@
 
             <div class="control-row">
               <div class="control-label">
-<<<<<<< HEAD
-                <span>Напрямок:</span>
-=======
                 <span>🧭 Напрямок:</span>
->>>>>>> feat/yurii-ui
                 <span id="wind-dir-val">90° (Схід)</span>
               </div>
               <div class="compass-container">
                 <input id="wind-dir-slider" type="range" min="0" max="355" step="5" value="90" />
                 <div class="compass-dial">
-<<<<<<< HEAD
-                  <span id="compass-arrow" class="compass-needle" style="transform: rotate(90deg)">↑</span>
-=======
                   <span id="compass-arrow" class="compass-needle" style="transform: rotate(90deg)">⬆️</span>
->>>>>>> feat/yurii-ui
                 </div>
               </div>
             </div>
 
             <div class="control-row">
               <div class="control-label">
-<<<<<<< HEAD
-                <span>Вологість:</span>
-=======
                 <span>💧 Вологість:</span>
->>>>>>> feat/yurii-ui
                 <span id="humidity-val">38%</span>
               </div>
               <input id="humidity-slider" type="range" min="0" max="100" step="1" value="38" />
@@ -242,39 +161,6 @@
           </div>
 
           <div class="sandbox-actions">
-<<<<<<< HEAD
-            <button id="sandbox-play-btn" class="btn btn-primary">Старт</button>
-            <button id="sandbox-reset-btn" class="btn btn-secondary" title="Скинути карту">Скинути</button>
-          </div>
-        </div>
-
-        <div id="sim-controls-panel" class="dock-section hidden">
-          <div class="dock-label">Швидкість симуляції</div>
-          <div class="speed-strip">
-            <button id="play-pause-btn" class="btn speed-btn" title="Пауза / Продовжити">Пауза</button>
-            <button id="speed-1-btn" class="btn speed-btn active">1x</button>
-            <button id="speed-2-btn" class="btn speed-btn">2x</button>
-            <button id="speed-5-btn" class="btn speed-btn">5x</button>
-            <button id="step-btn" class="btn speed-btn" title="1 крок вперед">Крок</button>
-          </div>
-        </div>
-
-        <div class="dock-section telemetry-panel">
-          <div class="tele-row highlight">
-            <span>Селище</span>
-            <span id="stat-village" class="stat-value village-saved">10 / 10 (100%)</span>
-          </div>
-          <div class="tele-row">
-            <span>Ліс</span>
-            <span id="stat-saved" class="stat-value">100.0%</span>
-          </div>
-          <div class="tele-row">
-            <span>Горить</span>
-            <span id="stat-burning" class="stat-value burning">0</span>
-          </div>
-          <div class="tele-row">
-            <span>Згарище</span>
-=======
             <button id="sandbox-play-btn" class="btn btn-primary">▶️ Старт</button>
             <button id="sandbox-reset-btn" class="btn btn-icon-only" title="Скинути карту">🔄</button>
           </div>
@@ -308,79 +194,20 @@
           </div>
           <div class="tele-row">
             <span>⬛ Згарище</span>
->>>>>>> feat/yurii-ui
             <span id="stat-burned" class="stat-value burned">0</span>
           </div>
         </div>
       </aside>
 
-<<<<<<< HEAD
-      <section class="viewport-container">
-        <div class="canvas-wrapper">
-          <canvas id="sim-canvas" width="950" height="750"></canvas>
-          <div id="cell-action-menu" class="cell-action-menu hidden">
-            <button id="cell-btn-cancel" class="action-circle-btn btn-cancel" title="Скасувати">✕</button>
-            <button id="cell-btn-info" class="action-circle-btn btn-info" title="Інформація про ділянку">ℹ</button>
-            <button id="cell-btn-build" class="action-circle-btn btn-build" title="Встановити вежу">🏠</button>
-          </div>
-          <div id="cell-info-card" class="cell-info-card hidden">
-            <div class="cell-info-header">
-              <span id="cell-info-badge" class="cell-info-badge">1</span>
-              <span id="cell-info-title" class="cell-info-title">Ділянка</span>
-              <button id="cell-info-close" class="cell-info-close">✕</button>
-            </div>
-            <p id="cell-info-desc" class="cell-info-desc"></p>
-            <div class="cell-info-meta">
-              <span id="cell-info-risk" class="cell-info-risk">⚠️ Небезпека: 0%</span>
-              <span id="cell-info-defense" class="cell-info-defense">🛡️ Захист: 100%</span>
-            </div>
-          </div>
-=======
       <!-- Simulation Canvas Viewport (Expanded Left / Center) -->
       <section class="viewport-container">
         <div class="canvas-wrapper">
           <canvas id="sim-canvas" width="950" height="750"></canvas>
->>>>>>> feat/yurii-ui
         </div>
 
         <div class="canvas-legend">
           <div class="legend-item">
             <span class="legend-color" style="background: #2e7d32"></span>
-<<<<<<< HEAD
-            <span>Ліс</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background: #827717"></span>
-            <span>Кущі</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background: #c62828"></span>
-            <span>Селище</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background: #0288d1"></span>
-            <span>Вода</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background: #5d4037"></span>
-            <span>Берег</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background: #d7ccc8"></span>
-            <span>Смуга (2 б)</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background: #00bcd4"></span>
-            <span>Вежа (18 б)</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background: #f4511e"></span>
-            <span>Вогонь</span>
-          </div>
-          <div class="legend-item">
-            <span class="legend-color" style="background: #1c1c1c"></span>
-            <span>Згарище</span>
-=======
             <span>🌲 Ліс</span>
           </div>
           <div class="legend-item">
@@ -414,37 +241,17 @@
           <div class="legend-item">
             <span class="legend-color" style="background: #1c1c1c"></span>
             <span>⬛ Згарище</span>
->>>>>>> feat/yurii-ui
           </div>
         </div>
       </section>
+
+      <!-- Survival Mode Interactive Story Viewport -->
+      <section id="survival-container" class="survival-view hidden"></section>
     </main>
 
+    <!-- Results Modal (Phase 3 of Planning Mode) -->
     <div id="results-modal" class="modal-backdrop hidden">
       <div class="modal-card">
-<<<<<<< HEAD
-        <h2 class="modal-title">Результати оборони селища</h2>
-
-        <div class="modal-metrics">
-          <div class="modal-metric-row highlight-row">
-            <span>Хатинки селища фермера:</span>
-            <span id="result-village-val" class="metric-val positive">10 / 10 (100% врятовано)</span>
-          </div>
-          <div class="modal-metric-row">
-            <span>Збережено лісового фонду:</span>
-            <span id="result-saved-val" class="metric-val positive">85.0%</span>
-          </div>
-          <div class="modal-metric-row">
-            <span>Базовий сценарій (без дій фермера):</span>
-            <span id="result-baseline-val" class="metric-val">30.0%</span>
-          </div>
-          <div class="modal-metric-row">
-            <span>Ефективність вашого плану:</span>
-            <span id="result-diff-val" class="metric-val positive">+55.0%</span>
-          </div>
-          <div class="modal-metric-row">
-            <span>Використано ресурсів часу:</span>
-=======
         <h2 class="modal-title">🏆 Результати оборони селища</h2>
 
         <div class="modal-metrics">
@@ -466,7 +273,6 @@
           </div>
           <div class="modal-metric-row">
             <span> Використано ресурсів часу:</span>
->>>>>>> feat/yurii-ui
             <span id="result-budget-val" class="metric-val">46 / 50 балів</span>
           </div>
         </div>
@@ -476,11 +282,7 @@
         </div>
 
         <button id="retry-btn" class="btn btn-primary">
-<<<<<<< HEAD
-          Спробувати іншу стратегію
-=======
           🔄 Спробувати іншу стратегію
->>>>>>> feat/yurii-ui
         </button>
       </div>
     </div>
