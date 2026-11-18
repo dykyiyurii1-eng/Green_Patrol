@@ -12,11 +12,14 @@ export interface BaselineResult {
   ticks: number;
 }
 
+<<<<<<< Updated upstream
 /**
  * Runs a deterministic simulation from the unmodified scenario grid (without any player actions)
  * using the exact same random seed and environment.
  * Provides the objective benchmark ("saved vs. baseline") to measure player efficacy.
  */
+=======
+>>>>>>> Stashed changes
 export function runBaselineSimulation(
   cleanGrid: SimulationGrid,
   env: EnvironmentState,

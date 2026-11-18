@@ -39,8 +39,24 @@ export class PlanningManager {
     const idx = this.grid.getIndex(x, y);
     const currentTerrain = this.grid.terrain[idx];
 
+<<<<<<< Updated upstream
     // Cannot place firebreak on water or if it's already a firebreak
     if (currentTerrain === TerrainType.WATER || currentTerrain === TerrainType.FIREBREAK) {
+=======
+    if (
+      currentTerrain === TerrainType.WATER ||
+      currentTerrain === TerrainType.WET_GROUND ||
+      currentTerrain === TerrainType.FIREBREAK ||
+      currentTerrain === TerrainType.HOUSES
+    ) {
+      this.lastErrorMessage = 'Тут не можна копати смугу';
+      return false;
+    }
+
+    if (this.grid.isNearActiveFire(x, y, heatRadius)) {
+      this.lastErrorMessage =
+        'Занадто близько до полум’я! Спека та їдкий дим не дозволяють працювати впритул до вогню.';
+>>>>>>> Stashed changes
       return false;
     }
 

@@ -33,7 +33,30 @@ describe('Wildfire Simulation Core Tests', () => {
       simulationStep(grid, defaultEnv, rng);
     }
 
+<<<<<<< Updated upstream
     // Check that no other water cells caught fire
+=======
+    for (let i = 0; i < grid.size; i++) {
+      if (i !== centerIdx) {
+        expect(grid.state[i]).toBe(CellState.UNBURNED);
+      }
+    }
+  });
+
+  it('fire never spreads onto wet ground/shoreline sand', () => {
+    const grid = new SimulationGrid(10, 10);
+    grid.terrain.fill(TerrainType.WET_GROUND);
+
+    const centerIdx = grid.getIndex(5, 5);
+    grid.state[centerIdx] = CellState.BURNING;
+
+    const rng = createMulberry32(54321);
+
+    for (let t = 0; t < 10; t++) {
+      simulationStep(grid, defaultEnv, rng);
+    }
+
+>>>>>>> Stashed changes
     for (let i = 0; i < grid.size; i++) {
       if (i !== centerIdx) {
         expect(grid.state[i]).toBe(CellState.UNBURNED);
@@ -79,7 +102,11 @@ describe('Wildfire Simulation Core Tests', () => {
       const env: EnvironmentState = {
         windSpeed,
         windDirectionDeg: 90,
+<<<<<<< Updated upstream
         humidity: 55,
+=======
+        humidity: 50,
+>>>>>>> Stashed changes
       };
 
       const rng = createMulberry32(101);
@@ -114,7 +141,10 @@ describe('Wildfire Simulation Core Tests', () => {
     const grid = new SimulationGrid(20, 20);
     grid.terrain.fill(TerrainType.FOREST);
 
+<<<<<<< Updated upstream
     // Build vertical firebreak line at x = 10 from top to bottom
+=======
+>>>>>>> Stashed changes
     for (let y = 0; y < grid.height; y++) {
       grid.terrain[grid.getIndex(10, y)] = TerrainType.FIREBREAK;
     }
@@ -235,6 +265,29 @@ describe('Wildfire Simulation Core Tests', () => {
 
     // Now we can place another firebreak (cost 3)
     expect(planner.placeFirebreak(1, 4)).toBe(true);
+<<<<<<< Updated upstream
     expect(planner.budgetUsed).toBe(9);
+=======
+  });
+
+  it('cannot place firebreak inside heat danger zone next to active fire', () => {
+    const grid = new SimulationGrid(15, 15);
+    grid.terrain.fill(TerrainType.FOREST);
+
+    grid.state[grid.getIndex(5, 5)] = CellState.BURNING;
+
+    const budget = {
+      totalBudget: 50,
+      firebreakCostPerCell: 2,
+      watchTowerCost: 15,
+    };
+
+    const planner = new PlanningManager(grid, budget);
+
+    expect(planner.placeFirebreak(5, 6)).toBe(false);
+    expect(planner.lastErrorMessage).toContain('Занадто близько до полум’я');
+
+    expect(planner.placeFirebreak(5, 9)).toBe(true);
+>>>>>>> Stashed changes
   });
 });

@@ -1,4 +1,5 @@
 :root {
+<<<<<<< Updated upstream
   --primary: #3b6625;
   --primary-hover: #4a7d30;
   --primary-light: #8bc34a;
@@ -11,6 +12,18 @@
   --text-main: #f4f1ea;
   --text-muted: #c5cfa8;
   --text-gold: #e6c67c;
+=======
+  --primary: #458f62;
+  --primary-hover: #377750;
+  --accent: #d86847;
+  --accent-hover: #be5637;
+  --bg-body: #d8ebf2;
+  --panel-bg: #ffffff;
+  --section-bg: #f5f8fa;
+  --panel-border: #cfe0e8;
+  --text-main: #243842;
+  --text-muted: #6e8894;
+>>>>>>> Stashed changes
   --font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
@@ -22,26 +35,124 @@
 
 body {
   font-family: var(--font-family);
+<<<<<<< Updated upstream
   background-color: var(--bg-dark);
   background-image: radial-gradient(circle at center, #1e2818 0%, #0f140c 100%);
+=======
+  background: linear-gradient(180deg, #d3e7ef 0%, #eaf3f7 100%);
+>>>>>>> Stashed changes
   color: var(--text-main);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
+<<<<<<< Updated upstream
 /* --- ШАПКА --- */
 header {
   background: linear-gradient(180deg, #2b3822 0%, #1d2617 100%);
   border-bottom: 2px solid var(--border-gold);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
   padding: 0.6rem 1.5rem;
+=======
+.intro-screen {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, #e8f4f8 0%, #cce5ee 100%);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 2rem;
+}
+
+.intro-screen.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.intro-content {
+  max-width: 650px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.intro-line {
+  font-size: 2.1rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: #243842;
+  min-height: 3rem;
+  line-height: 1.4;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.intro-line.highlight {
+  font-size: 2.3rem;
+  font-weight: 700;
+  color: #d86847;
+  text-shadow: 0 4px 12px rgba(216, 104, 71, 0.15);
+}
+
+.cursor-blink::after {
+  content: '|';
+  display: inline-block;
+  color: #d86847;
+  animation: blink 0.8s infinite;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.skip-btn {
+  background: #ffffff;
+  border: 1px solid var(--panel-border);
+  color: #55707d;
+  padding: 0.55rem 1.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 20px;
+  cursor: pointer;
+  align-self: center;
+  margin-top: 1.8rem;
+  box-shadow: 0 3px 8px rgba(36, 56, 66, 0.06);
+  transition: all 0.2s ease;
+}
+
+.skip-btn:hover {
+  background: #f0f6f9;
+  color: #243842;
+  box-shadow: 0 4px 12px rgba(36, 56, 66, 0.1);
+}
+
+header {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--panel-border);
+  padding: 0.65rem 1.4rem;
+>>>>>>> Stashed changes
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+<<<<<<< Updated upstream
   gap: 1rem;
   z-index: 10;
+=======
+  gap: 0.75rem;
+  box-shadow: 0 2px 10px rgba(36, 56, 66, 0.03);
+>>>>>>> Stashed changes
 }
 
 .logo-area {
@@ -51,6 +162,7 @@ header {
 }
 
 .logo-icon {
+<<<<<<< Updated upstream
   font-size: 2rem;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.7));
 }
@@ -62,6 +174,20 @@ header {
   text-transform: uppercase;
   color: #a8d46f;
   text-shadow: 0 2px 3px rgba(0, 0, 0, 0.8);
+=======
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(36, 56, 66, 0.08);
+}
+
+.logo-title h1 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #243842;
+  line-height: 1.2;
+>>>>>>> Stashed changes
 }
 
 .logo-title p {
@@ -71,25 +197,41 @@ header {
 
 .mode-switcher {
   display: flex;
+<<<<<<< Updated upstream
   background: var(--panel-bg-dark);
   padding: 0.25rem;
   border-radius: 6px;
   border: 2px solid var(--border-gold);
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+=======
+  background: #eaf1f5;
+  padding: 3px;
+  border-radius: 10px;
+  border: 1px solid var(--panel-border);
+>>>>>>> Stashed changes
 }
 
 .mode-btn {
   background: transparent;
   color: var(--text-muted);
+<<<<<<< Updated upstream
   border: 1px solid transparent;
   padding: 0.45rem 1rem;
   font-size: 0.85rem;
   font-weight: 700;
   border-radius: 4px;
+=======
+  border: none;
+  padding: 0.42rem 0.95rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: 8px;
+>>>>>>> Stashed changes
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
+<<<<<<< Updated upstream
 .mode-btn:hover {
   color: #fff;
 }
@@ -108,6 +250,21 @@ main {
   display: flex;
   flex-direction: row-reverse; /* Ставить .sidebar зліва, а .viewport-container справа */
   padding: 1rem;
+=======
+.mode-btn.active {
+  background: #ffffff;
+  color: var(--text-main);
+  box-shadow: 0 2px 6px rgba(36, 56, 66, 0.08);
+}
+
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  align-items: stretch;
+  padding: 0.9rem 1.3rem;
+>>>>>>> Stashed changes
   gap: 1rem;
   max-width: 1500px;
   margin: 0 auto;
@@ -121,6 +278,7 @@ main {
   }
 }
 
+<<<<<<< Updated upstream
 /* --- ІГРОВЕ ПОЛЕ ТА ПЛАВАЮЧИЙ БРИФІНГ --- */
 .viewport-container {
   flex: 1;
@@ -129,6 +287,19 @@ main {
   flex-direction: column;
   align-items: center;
   gap: 0.6rem;
+=======
+.sidebar {
+  width: 250px;
+  flex-shrink: 0;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 6px 20px rgba(36, 56, 66, 0.06);
+>>>>>>> Stashed changes
 }
 
 .canvas-wrapper {
@@ -209,6 +380,7 @@ canvas#sim-canvas {
   }
 }
 
+<<<<<<< Updated upstream
 .card {
   background: linear-gradient(180deg, #2a3722 0%, #202a1a 100%);
   border: 2px solid var(--border-gold);
@@ -245,10 +417,56 @@ canvas#sim-canvas {
   background: var(--panel-bg-dark);
   color: var(--text-main);
   border: 1px solid var(--border-gold);
+=======
+.dock-section {
+  background: var(--section-bg);
+  border: 1px solid #dce8ef;
+  border-radius: 12px;
+  padding: 10px;
+}
+
+.dock-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin-bottom: 7px;
+}
+
+.map-row {
+  display: flex;
+  gap: 6px;
+}
+
+.compact-select {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 9px;
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--text-main);
+  border: 1px solid var(--panel-border);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+}
+
+.icon-info-btn {
+  width: 30px;
+  flex-shrink: 0;
+  background: #ffffff;
+  border: 1px solid var(--panel-border);
+  color: var(--text-muted);
+  border-radius: 8px;
+  font-weight: 700;
+>>>>>>> Stashed changes
   font-size: 0.85rem;
   font-weight: 600;
   margin-bottom: 0.6rem;
   cursor: pointer;
+<<<<<<< Updated upstream
 }
 
 .scenario-desc {
@@ -348,6 +566,25 @@ canvas#sim-canvas {
 }
 
 /* --- БЮДЖЕТ ТА ШКАЛА НЕБЕЗПЕКИ --- */
+=======
+  transition: all 0.15s ease;
+}
+
+.icon-info-btn:hover {
+  background: #eaf2f6;
+  color: var(--text-main);
+}
+
+.scenario-desc {
+  margin-top: 8px;
+  padding-top: 7px;
+  border-top: 1px dashed var(--panel-border);
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: #4a6370;
+}
+
+>>>>>>> Stashed changes
 .budget-container {
   background: var(--panel-bg-dark);
   border: 1px solid var(--border-gold);
@@ -395,14 +632,176 @@ canvas#sim-canvas {
 .control-label {
   display: flex;
   justify-content: space-between;
+<<<<<<< Updated upstream
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--text-muted);
+=======
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+}
+
+.budget-val {
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+.budget-bar-bg {
+  width: 100%;
+  height: 8px;
+  background: #e2ecf1;
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid #d2e3eb;
+}
+
+.budget-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--primary);
+  border-radius: 5px;
+  transition:
+    width 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.action-alert {
+  background: #fde8e5;
+  border: 1px solid #f8b4a6;
+  color: #ad3318;
+  font-size: 0.74rem;
+  padding: 6px 8px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  line-height: 1.35;
+}
+
+.paint-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 7px;
+  margin-bottom: 10px;
+}
+
+.tool-tile {
+  position: relative;
+  background: #ffffff;
+  border: 1.5px solid #dbe6ec;
+  border-radius: 10px;
+  padding: 12px 6px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-main);
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(36, 56, 66, 0.04);
+  transition: all 0.15s ease;
+}
+
+.tool-tile:hover {
+  background: #fbfdfd;
+  border-color: #a4c8b3;
+  transform: translateY(-1px);
+}
+
+.tool-tile.active {
+  background: #ebf5ee;
+  border-color: var(--primary);
+  color: #1b4b2e;
+  box-shadow: 0 2px 6px rgba(69, 143, 98, 0.15);
+}
+
+.tool-tile.danger:hover {
+  background: #fdf2f0;
+  border-color: #e57373;
+}
+
+.tile-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.tile-cost {
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  background: #fdf3e2;
+  color: #aa6e12;
+  border: 1px solid #f6deb6;
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
+.btn {
+  background: #ffffff;
+  color: var(--text-main);
+  border: 1px solid var(--panel-border);
+  padding: 0.45rem 0.7rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(36, 56, 66, 0.04);
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.btn:hover {
+  background: #f5f9fb;
+  border-color: #b8d1dc;
+}
+
+.btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(69, 143, 98, 0.2);
+}
+
+.btn-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  width: 100%;
+  font-size: 0.85rem;
+  padding: 0.6rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(69, 143, 98, 0.25);
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.sandbox-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 9px;
+}
+
+.control-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+>>>>>>> Stashed changes
 }
 
 .control-row input[type='range'] {
   width: 100%;
+<<<<<<< Updated upstream
   accent-color: #8bc34a;
+=======
+  accent-color: var(--primary);
+>>>>>>> Stashed changes
   cursor: pointer;
 }
 
@@ -420,6 +819,7 @@ canvas#sim-canvas {
   display: flex;
   align-items: center;
   justify-content: center;
+<<<<<<< Updated upstream
   background: var(--panel-bg-dark);
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.7);
 }
@@ -427,10 +827,20 @@ canvas#sim-canvas {
 .compass-needle {
   font-size: 1.1rem;
   color: var(--text-gold);
+=======
+  background: #ffffff;
+}
+
+.compass-needle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary);
+>>>>>>> Stashed changes
   transform-origin: center;
   transition: transform 0.1s linear;
 }
 
+<<<<<<< Updated upstream
 /* --- СТАТИСТИКА --- */
 .stats-grid {
   display: grid;
@@ -459,13 +869,74 @@ canvas#sim-canvas {
   font-weight: 800;
   color: #9ccc65;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+=======
+.sandbox-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.btn-secondary {
+  flex-shrink: 0;
+  padding: 0.45rem 0.65rem;
+}
+
+.speed-strip {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr 1.3fr;
+  gap: 4px;
+}
+
+.speed-btn {
+  padding: 6px 2px;
+  font-size: 0.72rem;
+}
+
+.telemetry-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tele-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  padding-bottom: 5px;
+  border-bottom: 1px solid #e5eff4;
+}
+
+.tele-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.tele-row.highlight {
+  background: #fdf5ea;
+  border: 1px solid #f9deba;
+  border-radius: 8px;
+  padding: 6px 8px;
+  margin-bottom: 2px;
+}
+
+.stat-value {
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.stat-value.village-saved {
+  color: #ad7112;
+  font-size: 0.84rem;
+>>>>>>> Stashed changes
 }
 
 .stat-value.burning {
-  color: #ff7043;
+  color: #d86847;
 }
 
 .stat-value.burned {
+<<<<<<< Updated upstream
   color: #a19d94;
 }
 
@@ -474,6 +945,78 @@ canvas#sim-canvas {
   position: fixed;
   inset: 0;
   background: rgba(10, 14, 8, 0.82);
+=======
+  color: #8c9da5;
+}
+
+.viewport-container {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.65rem;
+}
+
+.canvas-wrapper {
+  flex: 1;
+  width: 100%;
+  min-height: 74vh;
+  background: #cce5ee;
+  padding: 6px;
+  border-radius: 16px;
+  border: 2px solid #b8d4e0;
+  box-shadow: 0 8px 24px rgba(36, 56, 66, 0.07);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+canvas#sim-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 78vh;
+  object-fit: contain;
+  image-rendering: pixelated;
+  cursor: crosshair;
+  border-radius: 10px;
+}
+
+.canvas-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  width: 100%;
+  background: var(--panel-bg);
+  padding: 8px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--panel-border);
+  box-shadow: 0 2px 8px rgba(36, 56, 66, 0.04);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.legend-color {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(36, 56, 66, 0.4);
+>>>>>>> Stashed changes
   display: flex;
   align-items: center;
   justify-content: center;
@@ -487,6 +1030,7 @@ canvas#sim-canvas {
 }
 
 .modal-card {
+<<<<<<< Updated upstream
   background: linear-gradient(180deg, #2b3822 0%, #1d2617 100%);
   border: 3px solid var(--border-gold-bright);
   border-radius: 10px;
@@ -494,12 +1038,22 @@ canvas#sim-canvas {
   max-width: 480px;
   width: 100%;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.9);
+=======
+  background: #ffffff;
+  border: 2px solid var(--primary);
+  border-radius: 18px;
+  padding: 1.6rem;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 14px 40px rgba(36, 56, 66, 0.2);
+>>>>>>> Stashed changes
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.1rem;
 }
 
 .modal-title {
+<<<<<<< Updated upstream
   background: linear-gradient(180deg, #43702b 0%, #2d4e1c 100%);
   border: 1px solid var(--border-gold-bright);
   border-radius: 6px;
@@ -508,14 +1062,25 @@ canvas#sim-canvas {
   font-weight: 800;
   text-transform: uppercase;
   color: #f4f1ea;
+=======
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #243842;
+>>>>>>> Stashed changes
   text-align: center;
   text-shadow: 0 2px 3px rgba(0, 0, 0, 0.8);
 }
 
 .modal-metrics {
+<<<<<<< Updated upstream
   background: var(--panel-bg-dark);
   border: 1px solid var(--border-gold);
   border-radius: 6px;
+=======
+  background: var(--section-bg);
+  border: 1px solid #dce8ef;
+  border-radius: 12px;
+>>>>>>> Stashed changes
   padding: 0.85rem;
   display: flex;
   flex-direction: column;
@@ -525,6 +1090,7 @@ canvas#sim-canvas {
 .modal-metric-row {
   display: flex;
   justify-content: space-between;
+<<<<<<< Updated upstream
   font-size: 0.9rem;
   border-bottom: 1px dashed #4a573f;
   padding-bottom: 0.4rem;
@@ -533,6 +1099,19 @@ canvas#sim-canvas {
 .modal-metric-row:last-child {
   border-bottom: none;
   padding-bottom: 0;
+=======
+  font-size: 0.88rem;
+  color: #3b525f;
+  border-bottom: 1px dashed var(--panel-border);
+  padding-bottom: 0.4rem;
+}
+
+.modal-metric-row.highlight-row {
+  border-bottom: 2px solid #e49733;
+  padding-bottom: 0.5rem;
+  font-size: 0.95rem;
+  color: #243842;
+>>>>>>> Stashed changes
 }
 
 .metric-val {
@@ -540,6 +1119,7 @@ canvas#sim-canvas {
 }
 
 .metric-val.positive {
+<<<<<<< Updated upstream
   color: #9ccc65;
 }
 
@@ -556,6 +1136,23 @@ canvas#sim-canvas {
   font-size: 0.85rem;
   line-height: 1.45;
   color: var(--text-main);
+=======
+  color: var(--primary);
+}
+
+.metric-val.negative {
+  color: #d86847;
+}
+
+.modal-feedback {
+  background: #edf6f0;
+  border-left: 4px solid var(--primary);
+  padding: 0.85rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: #235235;
+>>>>>>> Stashed changes
 }
 
 .hidden {
@@ -566,8 +1163,16 @@ canvas#sim-canvas {
 footer {
   text-align: center;
   padding: 0.65rem;
+<<<<<<< Updated upstream
   font-size: 0.75rem;
   color: var(--text-muted);
   border-top: 2px solid var(--border-gold);
   background: var(--panel-bg-dark);
 }
+=======
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--panel-border);
+  background: rgba(255, 255, 255, 0.8);
+}
+>>>>>>> Stashed changes

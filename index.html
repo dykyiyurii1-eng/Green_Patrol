@@ -7,26 +7,48 @@
     <link rel="stylesheet" href="./src/ui/style.css" />
   </head>
   <body>
+<<<<<<< Updated upstream
     <header>
       <div class="logo-area">
         <span class="logo-icon">🌲🔥</span>
         <div class="logo-title">
           <h1>Зелений Патруль (Green Patrol)</h1>
           <p>Симулятор протипожежного захисту лісів • GENIUS Olympiad</p>
+=======
+    <div id="intro-overlay" class="intro-screen">
+      <div class="intro-content">
+        <div id="intro-line-1" class="intro-line"></div>
+        <div id="intro-line-2" class="intro-line highlight"></div>
+        <button id="skip-intro-btn" class="skip-btn">Пропустити</button>
+      </div>
+    </div>
+
+    <header>
+      <div class="logo-area">
+        <img src="./img_icon/Copy of Templates (new), копія.png" alt="Зелений Патруль" class="logo-icon" />
+        <div class="logo-title">
+          <h1>Зелений Патруль</h1>
+          <p>Місія фермера </p>
+>>>>>>> Stashed changes
         </div>
       </div>
 
       <div class="mode-switcher">
         <button id="mode-planning-btn" class="mode-btn active">
+<<<<<<< Updated upstream
           🛡️ Режим планування
+=======
+          Планування
+>>>>>>> Stashed changes
         </button>
         <button id="mode-sandbox-btn" class="mode-btn">
-          🧪 Пісочниця
+          Пісочниця
         </button>
       </div>
     </header>
 
     <main>
+<<<<<<< Updated upstream
       <!-- Simulation Canvas Viewport -->
       <section class="viewport-container">
         <div class="canvas-wrapper">
@@ -37,6 +59,24 @@
           <div class="legend-item">
             <span class="legend-color" style="background: #2e7d32"></span>
             <span>Ліс</span>
+=======
+      <aside class="sidebar">
+        <div class="dock-section">
+          <div class="map-row">
+            <select id="scenario-select" class="compact-select" title="Тактична карта фермера">
+              <option value="river-village">Річковий бір (30×30)</option>
+              <option value="dry-steppe-farm">Степовий хутір (30×30)</option>
+              <option value="hill-farmstead">Пагорб із вітряком (30×30)</option>
+            </select>
+            <button
+              type="button"
+              class="icon-info-btn"
+              title="Умови місії"
+              onclick="document.getElementById('scenario-description').classList.toggle('hidden')"
+            >
+              ?
+            </button>
+>>>>>>> Stashed changes
           </div>
           <div class="legend-item">
             <span class="legend-color" style="background: #8bc34a"></span>
@@ -82,10 +122,14 @@
           </p>
         </div>
 
+<<<<<<< Updated upstream
         <!-- Planning Mode Controls -->
         <div id="planning-panel" class="card">
           <div class="card-title">🛡️ Фаза 1: Підготовка та захист</div>
 
+=======
+        <div id="planning-panel" class="dock-section">
+>>>>>>> Stashed changes
           <div class="budget-container">
             <div class="control-label">
               <span>Доступний бюджет:</span>
@@ -96,6 +140,7 @@
             </div>
           </div>
 
+<<<<<<< Updated upstream
           <div class="btn-group">
             <button id="tool-firebreak-btn" class="btn active">
               🚧 Протипожежна смуга (2 б)
@@ -139,10 +184,65 @@
             <div class="control-label">
               <span>Швидкість вітру:</span>
               <span id="wind-speed-val">6.0 м/с</span>
+=======
+          <div id="planning-error-msg" class="action-alert hidden"></div>
+
+          <div class="dock-label">Інструменти</div>
+          <div class="paint-grid">
+            <button id="tool-firebreak-btn" class="tool-tile active" title="Протипожежна смуга (2 бали)">
+              <span class="tile-cost">2 б</span>
+              <span class="tile-name">Смуга</span>
+            </button>
+
+            <button id="tool-watchtower-btn" class="tool-tile" title="Водонапірна вежа (18 балів)">
+              <span class="tile-cost">18 б</span>
+              <span class="tile-name">Вежа</span>
+            </button>
+
+            <button id="undo-btn" class="tool-tile" title="Скасувати останню дію">
+              <span class="tile-name">Назад</span>
+            </button>
+
+            <button id="reset-plan-btn" class="tool-tile danger" title="Скинути весь план">
+              <span class="tile-name">Скинути</span>
+            </button>
+          </div>
+
+          <button id="start-fire-btn" class="btn btn-primary launch-btn">
+            Запустити вогонь
+          </button>
+        </div>
+
+        <div id="sandbox-panel" class="dock-section hidden">
+          <div class="dock-label">Пензлі пісочниці</div>
+          <div class="paint-grid">
+            <button id="tool-ignite-btn" class="tool-tile active" title="Запалити клітинку">
+              <span class="tile-name">Вогонь</span>
+            </button>
+            <button id="tool-sandbox-firebreak-btn" class="tool-tile" title="Протипожежна смуга">
+              <span class="tile-name">Смуга</span>
+            </button>
+            <button id="tool-forest-btn" class="tool-tile" title="Посадити ліс">
+              <span class="tile-name">Ліс</span>
+            </button>
+            <button id="tool-water-btn" class="tool-tile" title="Додати воду">
+              <span class="tile-name">Вода</span>
+            </button>
+          </div>
+
+          <div class="sandbox-controls">
+            <div class="control-row">
+              <div class="control-label">
+                <span>Вітер:</span>
+                <span id="wind-speed-val">6.5 м/с</span>
+              </div>
+              <input id="wind-speed-slider" type="range" min="0" max="25" step="0.5" value="6.5" />
+>>>>>>> Stashed changes
             </div>
             <input id="wind-speed-slider" type="range" min="0" max="25" step="0.5" value="6" />
           </div>
 
+<<<<<<< Updated upstream
           <div class="control-row">
             <div class="control-label">
               <span>Напрямок вітру:</span>
@@ -152,10 +252,30 @@
               <input id="wind-dir-slider" type="range" min="0" max="355" step="5" value="90" />
               <div class="compass-dial">
                 <span id="compass-arrow" class="compass-needle" style="transform: rotate(90deg)">⬆️</span>
+=======
+            <div class="control-row">
+              <div class="control-label">
+                <span>Напрямок:</span>
+                <span id="wind-dir-val">90° (Схід)</span>
+              </div>
+              <div class="compass-container">
+                <input id="wind-dir-slider" type="range" min="0" max="355" step="5" value="90" />
+                <div class="compass-dial">
+                  <span id="compass-arrow" class="compass-needle" style="transform: rotate(90deg)">↑</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="control-row">
+              <div class="control-label">
+                <span>Вологість:</span>
+                <span id="humidity-val">38%</span>
+>>>>>>> Stashed changes
               </div>
             </div>
           </div>
 
+<<<<<<< Updated upstream
           <div class="control-row">
             <div class="control-label">
               <span>Відносна вологість:</span>
@@ -219,11 +339,94 @@
           </div>
         </div>
       </aside>
+=======
+          <div class="sandbox-actions">
+            <button id="sandbox-play-btn" class="btn btn-primary">Старт</button>
+            <button id="sandbox-reset-btn" class="btn btn-secondary" title="Скинути карту">Скинути</button>
+          </div>
+        </div>
+
+        <div id="sim-controls-panel" class="dock-section hidden">
+          <div class="dock-label">Швидкість симуляції</div>
+          <div class="speed-strip">
+            <button id="play-pause-btn" class="btn speed-btn" title="Пауза / Продовжити">Пауза</button>
+            <button id="speed-1-btn" class="btn speed-btn active">1x</button>
+            <button id="speed-2-btn" class="btn speed-btn">2x</button>
+            <button id="speed-5-btn" class="btn speed-btn">5x</button>
+            <button id="step-btn" class="btn speed-btn" title="1 крок вперед">Крок</button>
+          </div>
+        </div>
+
+        <div class="dock-section telemetry-panel">
+          <div class="tele-row highlight">
+            <span>Селище</span>
+            <span id="stat-village" class="stat-value village-saved">10 / 10 (100%)</span>
+          </div>
+          <div class="tele-row">
+            <span>Ліс</span>
+            <span id="stat-saved" class="stat-value">100.0%</span>
+          </div>
+          <div class="tele-row">
+            <span>Горить</span>
+            <span id="stat-burning" class="stat-value burning">0</span>
+          </div>
+          <div class="tele-row">
+            <span>Згарище</span>
+            <span id="stat-burned" class="stat-value burned">0</span>
+          </div>
+        </div>
+      </aside>
+
+      <section class="viewport-container">
+        <div class="canvas-wrapper">
+          <canvas id="sim-canvas" width="950" height="750"></canvas>
+        </div>
+
+        <div class="canvas-legend">
+          <div class="legend-item">
+            <span class="legend-color" style="background: #2e7d32"></span>
+            <span>Ліс</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #827717"></span>
+            <span>Кущі</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #c62828"></span>
+            <span>Селище</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #0288d1"></span>
+            <span>Вода</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #5d4037"></span>
+            <span>Берег</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #d7ccc8"></span>
+            <span>Смуга (2 б)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #00bcd4"></span>
+            <span>Вежа (18 б)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #f4511e"></span>
+            <span>Вогонь</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background: #1c1c1c"></span>
+            <span>Згарище</span>
+          </div>
+        </div>
+      </section>
+>>>>>>> Stashed changes
     </main>
 
-    <!-- Results Modal (Phase 3 of Planning Mode) -->
     <div id="results-modal" class="modal-backdrop hidden">
       <div class="modal-card">
+<<<<<<< Updated upstream
         <h2 class="modal-title">🏆 Результати протипожежної операції</h2>
 
         <div class="modal-metrics">
@@ -242,6 +445,30 @@
           <div class="modal-metric-row">
             <span>Використано бюджету:</span>
             <span id="result-budget-val" class="metric-val">110 / 120 балів</span>
+=======
+        <h2 class="modal-title">Результати оборони селища</h2>
+
+        <div class="modal-metrics">
+          <div class="modal-metric-row highlight-row">
+            <span>Хатинки селища фермера:</span>
+            <span id="result-village-val" class="metric-val positive">10 / 10 (100% врятовано)</span>
+          </div>
+          <div class="modal-metric-row">
+            <span>Збережено лісового фонду:</span>
+            <span id="result-saved-val" class="metric-val positive">85.0%</span>
+          </div>
+          <div class="modal-metric-row">
+            <span>Базовий сценарій (без дій фермера):</span>
+            <span id="result-baseline-val" class="metric-val">30.0%</span>
+          </div>
+          <div class="modal-metric-row">
+            <span>Ефективність вашого плану:</span>
+            <span id="result-diff-val" class="metric-val positive">+55.0%</span>
+          </div>
+          <div class="modal-metric-row">
+            <span>Використано ресурсів часу:</span>
+            <span id="result-budget-val" class="metric-val">46 / 50 балів</span>
+>>>>>>> Stashed changes
           </div>
         </div>
 
@@ -250,13 +477,17 @@
         </div>
 
         <button id="retry-btn" class="btn btn-primary">
+<<<<<<< Updated upstream
           🔄 Спробувати інший план
+=======
+          Спробувати іншу стратегію
+>>>>>>> Stashed changes
         </button>
       </div>
     </div>
 
     <footer>
-      Green Patrol (Зелений Патруль) &copy; 2026-2027 • Проект для GENIUS Olympiad (Coding Category)
+      Green Patrol (Зелений Патруль) &copy;
     </footer>
 
     <script type="module" src="./src/main.ts"></script>

@@ -5,17 +5,15 @@ export class SimulationGrid {
   readonly height: number;
   readonly size: number;
 
-  /** Cell dynamic state: UNBURNED (0), BURNING (1), BURNED (2) */
   state: Uint8Array;
+<<<<<<< Updated upstream
   /** Static terrain: FOREST, GRASS, WATER, ROAD, FIREBREAK */
+=======
+>>>>>>> Stashed changes
   terrain: Uint8Array;
-  /** Fuel density factor between 0.0 and 1.0 (default 1.0) */
   density: Float32Array;
-  /** Elevation in meters (default 0.0) */
   elevation: Float32Array;
-  /** Counter of how many ticks a cell has been actively burning */
   burnTicks: Uint8Array;
-  /** Active watchtowers / water mitigation points */
   watchTowers: WatchTower[];
 
   constructor(width: number = 100, height: number = 100) {
@@ -24,7 +22,7 @@ export class SimulationGrid {
     this.size = width * height;
 
     this.state = new Uint8Array(this.size);
-    this.terrain = new Uint8Array(this.size); // Defaults to FOREST (0)
+    this.terrain = new Uint8Array(this.size);
     this.density = new Float32Array(this.size);
     this.density.fill(1.0);
     this.elevation = new Float32Array(this.size);
@@ -48,10 +46,57 @@ export class SimulationGrid {
     return x >= 0 && x < this.width && y >= 0 && y < this.height;
   }
 
+<<<<<<< Updated upstream
   /**
    * Performs an exact deep clone of the grid state and terrain.
    * Crucial for baseline comparisons and resets.
    */
+=======
+  generateWetShorelines(): void {
+    const toWet: number[] = [];
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        const idx = this.getIndex(x, y);
+        if (this.terrain[idx] === TerrainType.WATER) {
+          for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+              const nx = x + dx;
+              const ny = y + dy;
+              if (this.inBounds(nx, ny)) {
+                const nIdx = this.getIndex(nx, ny);
+                if (
+                  this.terrain[nIdx] !== TerrainType.WATER &&
+                  this.terrain[nIdx] !== TerrainType.HOUSES
+                ) {
+                  toWet.push(nIdx);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    for (let i = 0; i < toWet.length; i++) {
+      this.terrain[toWet[i]] = TerrainType.WET_GROUND;
+    }
+  }
+
+  isNearActiveFire(x: number, y: number, radius: number): boolean {
+    for (let dy = -radius; dy <= radius; dy++) {
+      for (let dx = -radius; dx <= radius; dx++) {
+        const nx = x + dx;
+        const ny = y + dy;
+        if (this.inBounds(nx, ny)) {
+          if (this.state[this.getIndex(nx, ny)] === CellState.BURNING) {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+>>>>>>> Stashed changes
   clone(): SimulationGrid {
     const copy = new SimulationGrid(this.width, this.height);
     copy.state.set(this.state);
