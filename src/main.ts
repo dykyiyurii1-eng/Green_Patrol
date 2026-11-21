@@ -7,5 +7,5 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   // Initialize application
-  new App(canvas);
+ new App(canvas)
 });

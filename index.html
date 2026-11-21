@@ -3,22 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Зелений Патруль | Green Patrol - Захист Селища Фермера</title>
+    <title>Зелений Патруль | Green Patrol — Захист Селища Фермера</title>
     <link rel="stylesheet" href="./src/ui/style.css" />
   </head>
   <body>
-    <!-- Cinematic Typewriter Intro Screen -->
+    <!-- Кінематографічне інтро -->
     <div id="intro-overlay" class="intro-screen">
       <div class="intro-content">
         <div id="intro-line-1" class="intro-line"></div>
         <div id="intro-line-2" class="intro-line highlight"></div>
-        <button id="skip-intro-btn" class="skip-btn">Пропустити ➔</button>
+        <button id="skip-intro-btn" class="skip-btn">Пропустити</button>
       </div>
     </div>
 
-    <!-- ВЕРХНЯ ПАНЕЛЬ HUD (стиль Into the Breach) -->
+    <!-- ВЕРХНЯ ТЕЛЕМЕТРИЧНА ПАНЕЛЬ -->
     <header class="hud-header">
-      <div class="hud-pill logo-area">
+      <div class="hud-group logo-area">
         <img
           src="./img_icon/logo_green_patron.png"
           alt="Зелений Патруль"
@@ -26,7 +26,7 @@
         />
         <div class="logo-title">
           <h1>Зелений Патруль</h1>
-          <p>Місія фермера • GENIUS Olympiad</p>
+          <p>GENIUS Olympiad</p>
         </div>
 
         <div class="hud-divider"></div>
@@ -37,9 +37,9 @@
             class="compact-select"
             title="Тактична карта фермера"
           >
-            <option value="river-village">🌲 Річковий бір (30×30)</option>
-            <option value="dry-steppe-farm">🌾 Степовий хутір (30×30)</option>
-            <option value="hill-farmstead">⛰️ Пагорб із вітряком (30×30)</option>
+            <option value="river-village">Річковий бір</option>
+            <option value="dry-steppe-farm">Степовий хутір</option>
+            <option value="hill-farmstead">Пагорб із вітряком</option>
           </select>
           <button
             type="button"
@@ -52,22 +52,26 @@
         </div>
       </div>
 
-      <!-- Центральний статус екосистеми (Телеметрія) -->
-      <div class="hud-pill telemetry-bar">
+      <!-- Вбудована телеметрія екосистеми -->
+      <div class="telemetry-bar" role="status">
         <div class="tele-chip highlight">
-          <span>🏡 Селище</span>
+          <svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 4l9 6.5M5.5 9.5V19h13V9.5M10 19v-5h4v5"/></svg>
+          <span>Селище</span>
           <span id="stat-village" class="stat-value village-saved">10 / 10 (100%)</span>
         </div>
+        <div class="hud-divider"></div>
         <div class="tele-chip">
-          <span>🌲 Ліс</span>
+          <span>Ліс</span>
           <span id="stat-saved" class="stat-value">100.0%</span>
         </div>
+        <div class="hud-divider"></div>
         <div class="tele-chip">
-          <span>🔥 Горить</span>
+          <span>Горить</span>
           <span id="stat-burning" class="stat-value burning">0</span>
         </div>
+        <div class="hud-divider"></div>
         <div class="tele-chip">
-          <span>⬛ Згарище</span>
+          <span>Згарище</span>
           <span id="stat-burned" class="stat-value burned">0</span>
         </div>
       </div>
@@ -75,13 +79,13 @@
       <!-- Перемикач режимів -->
       <div class="mode-switcher">
         <button id="mode-planning-btn" class="mode-btn active">
-          🛡️ Планування
+          Планування
         </button>
         <button id="mode-sandbox-btn" class="mode-btn">
-          🧪 Пісочниця
+          Пісочниця
         </button>
         <button id="mode-survival-btn" class="mode-btn">
-          🏃 Виживання
+          Виживання
         </button>
       </div>
     </header>
@@ -100,58 +104,60 @@
 
         <!-- Нижній лівий кут: згорнута легенда карти -->
         <details class="legend-popover">
-          <summary class="legend-toggle">📖 Легенда карти</summary>
+          <summary class="legend-toggle">
+            <svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 4 8 4.5-8 4.5-8-4.5L12 4Zm-8 8.5 8 4.5 8-4.5M4 16.5 12 21l8-4.5"/></svg>
+            <span>Легенда карти</span>
+          </summary>
           <div class="canvas-legend">
             <div class="legend-item">
               <span class="legend-color" style="background: #2e7d32"></span>
-              <span>🌲 Ліс</span>
+              <span>Ліс</span>
             </div>
             <div class="legend-item">
               <span class="legend-color" style="background: #827717"></span>
-              <span>🌿 Кущі</span>
+              <span>Кущі</span>
             </div>
             <div class="legend-item">
               <span class="legend-color" style="background: #c62828"></span>
-              <span>🏡 Селище</span>
+              <span>Селище</span>
             </div>
             <div class="legend-item">
               <span class="legend-color" style="background: #0288d1"></span>
-              <span>💧 Вода</span>
+              <span>Вода</span>
             </div>
             <div class="legend-item">
               <span class="legend-color" style="background: #5d4037"></span>
-              <span>🏖️ Берег</span>
+              <span>Берег</span>
             </div>
             <div class="legend-item">
               <span class="legend-color" style="background: #d7ccc8"></span>
-              <span>🚧 Смуга (2 б)</span>
+              <span>Смуга (2 б)</span>
             </div>
             <div class="legend-item">
               <span class="legend-color" style="background: #00bcd4"></span>
-              <span>🗼 Вежа (18 б)</span>
+              <span>Вежа (18 б)</span>
             </div>
             <div class="legend-item">
               <span class="legend-color" style="background: #f4511e"></span>
-              <span>🔥 Вогонь</span>
+              <span>Вогонь</span>
             </div>
             <div class="legend-item">
               <span class="legend-color" style="background: #1c1c1c"></span>
-              <span>⬛ Згарище</span>
+              <span>Згарище</span>
             </div>
           </div>
         </details>
       </section>
 
-      <!-- Нижній тактичний док (збережено клас .sidebar для сумісності з main.ts) -->
+      <!-- Нижній тактичний док -->
       <aside class="sidebar">
-        <!-- Повідомлення про помилку планування -->
         <div id="planning-error-msg" class="action-alert floating-alert hidden"></div>
 
-        <!-- 1. Панель режиму планування (стиль Polytopia) -->
+        <!-- 1. Панель режиму планування -->
         <div id="planning-panel" class="bottom-dock">
           <div class="budget-pill">
             <div class="control-label">
-              <span>⚡ Ресурси</span>
+              <span>Ресурси</span>
               <span id="budget-text" class="budget-val">0 / 50 балів</span>
             </div>
             <div class="budget-bar-bg">
@@ -168,7 +174,7 @@
               title="Протипожежна смуга (2 бали)"
             >
               <span class="tile-cost">2 б</span>
-              <span class="tile-icon">🚧</span>
+              <svg class="tile-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19 19 4M14 4h5v5M5 11l4 4"/></svg>
               <span class="tile-name">Смуга</span>
             </button>
 
@@ -178,7 +184,7 @@
               title="Водонапірна вежа (18 балів)"
             >
               <span class="tile-cost">18 б</span>
-              <span class="tile-icon">🗼</span>
+              <svg class="tile-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 6.8 10.2a6.5 6.5 0 1 0 10.4 0L12 3.5Z"/></svg>
               <span class="tile-name">Вежа</span>
             </button>
 
@@ -187,7 +193,7 @@
               class="tool-tile"
               title="Скасувати останню дію"
             >
-              <span class="tile-icon">↩️</span>
+              <svg class="tile-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"/></svg>
               <span class="tile-name">Назад</span>
             </button>
 
@@ -196,7 +202,7 @@
               class="tool-tile danger"
               title="Скинути весь план"
             >
-              <span class="tile-icon">🔄</span>
+              <svg class="tile-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.3-5.6L4 8.5M4 4v4.5h4.5"/></svg>
               <span class="tile-name">Скинути</span>
             </button>
           </div>
@@ -204,7 +210,8 @@
           <div class="hud-divider"></div>
 
           <button id="start-fire-btn" class="btn btn-primary launch-btn">
-            🚀 Запустити вогонь
+            <svg class="ui-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c.5 3-1.5 4.8-1.5 7.2 0 1.4 1 2.3 2.2 2.3 1.5 0 2.3-1.3 2.3-3 1.8 1.5 2.5 3.6 2.5 5.5a5.5 5.5 0 1 1-11 0c0-3.6 2.5-6.7 5.5-12Z"/></svg>
+            <span>Запустити вогонь</span>
           </button>
         </div>
 
@@ -216,7 +223,7 @@
               class="tool-tile active"
               title="Запалити клітинку"
             >
-              <span class="tile-icon">🔥</span>
+              <svg class="tile-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c.5 3-1.5 4.8-1.5 7.2 0 1.4 1 2.3 2.2 2.3 1.5 0 2.3-1.3 2.3-3 1.8 1.5 2.5 3.6 2.5 5.5a5.5 5.5 0 1 1-11 0c0-3.6 2.5-6.7 5.5-12Z"/></svg>
               <span class="tile-name">Вогонь</span>
             </button>
             <button
@@ -224,7 +231,7 @@
               class="tool-tile"
               title="Протипожежна смуга"
             >
-              <span class="tile-icon">🚧</span>
+              <svg class="tile-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19 19 4M14 4h5v5M5 11l4 4"/></svg>
               <span class="tile-name">Смуга</span>
             </button>
             <button
@@ -232,7 +239,7 @@
               class="tool-tile"
               title="Посадити ліс"
             >
-              <span class="tile-icon">🌲</span>
+              <svg class="tile-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 6 8h-4l5 7H5l5-7H6l6-8Z"/><path d="M12 18v3"/></svg>
               <span class="tile-name">Ліс</span>
             </button>
             <button
@@ -240,7 +247,7 @@
               class="tool-tile"
               title="Додати воду"
             >
-              <span class="tile-icon">💧</span>
+              <svg class="tile-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 6.8 10.2a6.5 6.5 0 1 0 10.4 0L12 3.5Z"/></svg>
               <span class="tile-name">Вода</span>
             </button>
           </div>
@@ -250,7 +257,7 @@
           <div class="sandbox-controls">
             <div class="control-row">
               <div class="control-label">
-                <span>💨 Вітер:</span>
+                <span>Вітер</span>
                 <span id="wind-speed-val">6.5 м/с</span>
               </div>
               <input
@@ -265,7 +272,7 @@
 
             <div class="control-row">
               <div class="control-label">
-                <span>🧭 Напрямок:</span>
+                <span>Напрямок</span>
                 <span id="wind-dir-val">90° (Схід)</span>
               </div>
               <div class="compass-container">
@@ -278,19 +285,28 @@
                   value="90"
                 />
                 <div class="compass-dial">
-                  <span
+                  <svg
                     id="compass-arrow"
                     class="compass-needle"
                     style="transform: rotate(90deg)"
-                    >⬆️</span
+                    width="13"
+                    height="13"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
                   >
+                    <path d="M12 19V5M5 12l7-7 7 7" />
+                  </svg>
                 </div>
               </div>
             </div>
 
             <div class="control-row">
               <div class="control-label">
-                <span>💧 Вологість:</span>
+                <span>Вологість</span>
                 <span id="humidity-val">38%</span>
               </div>
               <input
@@ -308,14 +324,14 @@
 
           <div class="sandbox-actions">
             <button id="sandbox-play-btn" class="btn btn-primary launch-btn">
-              ▶️ Старт
+              Старт
             </button>
             <button
               id="sandbox-reset-btn"
               class="tool-tile danger"
               title="Скинути карту"
             >
-              <span class="tile-icon">🔄</span>
+              <svg class="tile-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.3-5.6L4 8.5M4 4v4.5h4.5"/></svg>
               <span class="tile-name">Скинути</span>
             </button>
           </div>
@@ -323,20 +339,21 @@
 
         <!-- 3. Керування швидкістю симуляції -->
         <div id="sim-controls-panel" class="bottom-dock speed-dock hidden">
-          <span class="dock-label">Швидкість</span>
+          <span class="dock-label">Темп</span>
           <div class="speed-strip">
             <button
               id="play-pause-btn"
               class="btn speed-btn"
               title="Пауза / Продовжити"
+              aria-label="Пауза"
             >
-              ⏸️
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
             </button>
             <button id="speed-1-btn" class="btn speed-btn active">1x</button>
             <button id="speed-2-btn" class="btn speed-btn">2x</button>
             <button id="speed-5-btn" class="btn speed-btn">5x</button>
-            <button id="step-btn" class="btn speed-btn" title="1 крок вперед">
-              ⏭️
+            <button id="step-btn" class="btn speed-btn" title="1 крок вперед" aria-label="Крок вперед">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M5 5l10 7-10 7V5zm12 0h2v14h-2V5z"/></svg>
             </button>
           </div>
         </div>
@@ -346,85 +363,71 @@
       <section id="survival-container" class="survival-view hidden"></section>
     </main>
 
-    <!-- Плаваюча підказка при наведенні на карту -->
+    <!-- Компактна підказка при наведенні на карту -->
     <div id="tile-hover-hint" class="tile-hover-hint hidden">
-      <span>🎯 Дії на клітинці</span>
       <kbd>ПКМ</kbd>
+      <span>Дії</span>
     </div>
 
-    <!-- Контекстне кругове меню по ПКМ (референс тактильних білих кіл) -->
+    <!-- Контекстне кругове меню по ПКМ -->
     <div id="radial-context-menu" class="radial-menu hidden" role="menu">
       <div id="radial-tooltip" class="radial-tooltip">Оберіть дію</div>
 
-      <!-- Ліва кнопка -->
       <button
         type="button"
         id="radial-btn-left"
         class="radial-circle radial-left"
         data-label="Смуга • 2 б"
-      >
-        <span class="radial-icon">🚧</span>
-        <span class="radial-cost">2б</span>
-      </button>
+      ></button>
 
-      <!-- Центральна збільшена кнопка (Інформація / Підказка) -->
       <button
         type="button"
         id="radial-btn-center"
         class="radial-circle radial-center"
         data-label="Умови та стан місії"
-      >
-        <span class="radial-icon-i">i</span>
-      </button>
+      ></button>
 
-      <!-- Права кнопка -->
       <button
         type="button"
         id="radial-btn-right"
         class="radial-circle radial-right"
         data-label="Вежа • 18 б"
-      >
-        <span class="radial-icon">🗼</span>
-        <span class="radial-cost">18б</span>
-      </button>
+      ></button>
 
-      <!-- Нижня мінікнопка скасування / 4-й інструмент у пісочниці -->
       <button
         type="button"
         id="radial-btn-bottom"
         class="radial-circle radial-bottom"
         data-label="Скасувати дію"
-      >
-        <span class="radial-icon-close">✕</span>
-      </button>
+      ></button>
     </div>
 
-    <!-- Results Modal (Phase 3 of Planning Mode) -->
+    <!-- Модальне вікно результатів -->
     <div id="results-modal" class="modal-backdrop hidden">
       <div class="modal-card">
-        <h2 class="modal-title">🏆 Результати оборони селища</h2>
+        <h2 class="modal-title">Результати оборони селища</h2>
 
         <div class="modal-metrics">
           <div class="modal-metric-row highlight-row">
-            <span>🏡 Хатинки селища фермера:</span>
+            <span>Хатинки селища фермера</span>
             <span id="result-village-val" class="metric-val positive"
               >10 / 10 (100% врятовано)</span
             >
           </div>
           <div class="modal-metric-row">
-            <span>🌲 Збережено лісового фонду:</span>
+            <span>Збережено лісового фонду</span>
             <span id="result-saved-val" class="metric-val positive">85.0%</span>
           </div>
           <div class="modal-metric-row">
-            <span>📉 Базовий сценарій (без дій фермера):</span>
+            <span>Базовий сценарій (без втручання)</span>
             <span id="result-baseline-val" class="metric-val">30.0%</span>
           </div>
           <div class="modal-metric-row">
-            <span>✨ Ефективність вашого плану:</span>
+            <span>Ефективність вашого плану</span>
             <span id="result-diff-val" class="metric-val positive">+55.0%</span>
           </div>
           <div class="modal-metric-row">
-            <span>⚡ Використано ресурсів часу:</span>
+            <span>Використано ресурсів</span>
             <span id="result-budget-val" class="metric-val">46 / 50 балів</span>
           </div>
         </div>
@@ -434,16 +437,16 @@
         </div>
 
         <button id="retry-btn" class="btn btn-primary">
-          🔄 Спробувати іншу стратегію
+          Спробувати іншу стратегію
         </button>
       </div>
     </div>
 
     <footer>
-      Green Patrol (Зелений Патруль) &copy; 2026-2027 • GENIUS Olympiad
+      Green Patrol • GENIUS Olympiad 2026
     </footer>
 
-    <!-- UI-обгортка для кругового меню по ПКМ (не змінює логіку main.ts) -->
+    <!-- UI-обгортка для кругового меню по ПКМ -->
     <script>
       (() => {
         const canvas = document.getElementById('sim-canvas');
@@ -456,6 +459,15 @@
         const btnRight = document.getElementById('radial-btn-right');
         const btnBottom = document.getElementById('radial-btn-bottom');
 
+        const SVG = {
+          trench: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19 19 4M14 4h5v5M5 11l4 4"/></svg>',
+          water: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 6.8 10.2a6.5 6.5 0 1 0 10.4 0L12 3.5Z"/></svg>',
+          flame: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c.5 3-1.5 4.8-1.5 7.2 0 1.4 1 2.3 2.2 2.3 1.5 0 2.3-1.3 2.3-3 1.8 1.5 2.5 3.6 2.5 5.5a5.5 5.5 0 1 1-11 0c0-3.6 2.5-6.7 5.5-12Z"/></svg>',
+          forest: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 6 8h-4l5 7H5l5-7H6l6-8Z"/><path d="M12 18v3"/></svg>',
+          info: '<span class="radial-icon-i">i</span>',
+          close: '<span class="radial-icon-close">✕</span>',
+        };
+
         let targetCoords = { clientX: 0, clientY: 0 };
 
         function isSandboxMode() {
@@ -467,30 +479,28 @@
         function configureMenuForMode() {
           if (isSandboxMode()) {
             btnLeft.dataset.label = 'Пензель: Вогонь';
-            btnLeft.innerHTML = '<span class="radial-icon">🔥</span>';
+            btnLeft.innerHTML = SVG.flame;
 
             btnCenter.dataset.label = 'Пензель: Ліс';
-            btnCenter.innerHTML = '<span class="radial-icon">🌲</span>';
+            btnCenter.innerHTML = SVG.forest;
 
             btnRight.dataset.label = 'Пензель: Смуга';
-            btnRight.innerHTML = '<span class="radial-icon">🚧</span>';
+            btnRight.innerHTML = SVG.trench;
 
             btnBottom.dataset.label = 'Пензель: Вода';
-            btnBottom.innerHTML = '<span class="radial-icon">💧</span>';
+            btnBottom.innerHTML = SVG.water;
           } else {
             btnLeft.dataset.label = 'Смуга • 2 б';
-            btnLeft.innerHTML =
-              '<span class="radial-icon">🚧</span><span class="radial-cost">2б</span>';
+            btnLeft.innerHTML = `${SVG.trench}<span class="radial-cost">2б</span>`;
 
             btnCenter.dataset.label = 'Умови та підказка місії';
-            btnCenter.innerHTML = '<span class="radial-icon-i">i</span>';
+            btnCenter.innerHTML = SVG.info;
 
             btnRight.dataset.label = 'Вежа • 18 б';
-            btnRight.innerHTML =
-              '<span class="radial-icon">🗼</span><span class="radial-cost">18б</span>';
+            btnRight.innerHTML = `${SVG.water}<span class="radial-cost">18б</span>`;
 
             btnBottom.dataset.label = 'Скасувати останню дію';
-            btnBottom.innerHTML = '<span class="radial-icon-close">✕</span>';
+            btnBottom.innerHTML = SVG.close;
           }
         }
 
@@ -617,4 +627,183 @@
 
     <script type="module" src="./src/main.ts"></script>
   </body>
+  <!-- ==================== ГОЛОВНИЙ ЕКРАН (СТАРТОВИЙ ТЕРМІНАЛ) ==================== -->
+<section id="home-screen" class="home-screen" aria-label="Головний екран Зелений Патруль">
+  <!-- Верхня координатна смуга -->
+  <div class="home-topbar">
+    <div class="home-coords">
+      <span class="status-dot"></span>
+      <span>ГІС-МОДЕЛЬ ПОЖЕЖНОЇ БЕЗПЕКИ · СІТКА 30×30</span>
+    </div>
+    <div class="home-meta">GENIUS OLYMPIAD 2026</div>
+  </div>
+
+  <!-- Центральний командний блок -->
+  <div class="home-container">
+    <div class="home-card">
+      <div class="home-header">
+        <img
+          src="./img_icon/logo_green_patron.png"
+          alt="Логотип Зелений Патруль"
+          class="home-logo"
+        />
+        <div class="home-title-group">
+          <span class="home-kicker">СИСТЕМА ТАКТИЧНОГО МОДЕЛЮВАННЯ</span>
+          <h1 class="home-title">Зелений Патруль</h1>
+        </div>
+      </div>
+
+      <p class="home-lead">
+        Симулятор поширення лісових пожеж на базі клітинних автоматів. Прокладайте
+        мінералізовані смуги, розміщуйте водонапірні вежі та захищайте селище
+        з урахуванням вітру, вологості й рельєфу місцевості.
+      </p>
+
+      <!-- Вибір стартового режиму -->
+      <div class="home-modes" role="radiogroup" aria-label="Оберіть режим гри">
+        <button
+          type="button"
+          class="home-mode-card is-selected"
+          data-target-mode="mode-planning-btn"
+          aria-checked="true"
+        >
+          <div class="mode-card-top">
+            <span class="mode-index">01</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19 19 4M14 4h5v5M5 11l4 4"/></svg>
+          </div>
+          <div class="mode-card-title">Планування</div>
+          <div class="mode-card-desc">
+            Оборона селища в межах бюджету балів та порівняння з базовим сценарієм.
+          </div>
+        </button>
+
+        <button
+          type="button"
+          class="home-mode-card"
+          data-target-mode="mode-sandbox-btn"
+          aria-checked="false"
+        >
+          <div class="mode-card-top">
+            <span class="mode-index">02</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h11a2.5 2.5 0 1 0-2.4-3M3 12h15a2.5 2.5 0 1 1-2.4 3M3 16h8a2 2 0 1 1-1.9 2.5"/></svg>
+          </div>
+          <div class="mode-card-title">Пісочниця</div>
+          <div class="mode-card-desc">
+            Вільне керування швидкістю й напрямком вітру, вологістю та ландшафтом.
+          </div>
+        </button>
+
+        <button
+          type="button"
+          class="home-mode-card"
+          data-target-mode="mode-survival-btn"
+          aria-checked="false"
+        >
+          <div class="mode-card-top">
+            <span class="mode-index">03</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 7v6c0 5 3.5 7.5 8 8 4.5-.5 8-3 8-8V7l-8-4Z"/></svg>
+          </div>
+          <div class="mode-card-title">Виживання</div>
+          <div class="mode-card-desc">
+            Покроковий польовий сценарій ухвалення рішень під час верхової пожежі.
+          </div>
+        </button>
+      </div>
+
+      <!-- Головна кнопка запуску та додаткові дії -->
+      <div class="home-actions">
+        <button id="start-game-btn" type="button" class="btn-start-game">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M7 5.5 18.5 12 7 18.5v-13Z" />
+          </svg>
+          <span>Почати грати</span>
+        </button>
+
+        <button id="home-intro-btn" type="button" class="btn-home-secondary">
+          Переглянути пролог
+        </button>
+
+        <button
+          id="home-model-toggle"
+          type="button"
+          class="btn-home-ghost"
+          aria-expanded="false"
+        >
+          Про фізичну модель
+        </button>
+      </div>
+
+      <!-- Згорнута наукова довідка про модель -->
+      <div id="home-model-info" class="home-model-drawer hidden">
+        <div class="model-spec">
+          <span class="spec-label">Алгоритм поширення</span>
+          <span class="spec-val">Клітинний автомат Alexandridis et al. (вітер p_w, рельєф p_s)</span>
+        </div>
+        <div class="model-spec">
+          <span class="spec-label">Оцінка ефективності</span>
+          <span class="spec-val">Детермінований ГПВЧ (mulberry32) для порівняння без втручання</span>
+        </div>
+        <div class="model-spec">
+          <span class="spec-label">Захисні механіки</span>
+          <span class="spec-val">Мінералізовані смуги, зволоження ґрунту, радіус теплового випромінювання</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Нижній рядок керування -->
+  <div class="home-bottombar">
+    <span>Керування на мапі: ЛКМ — дія · ПКМ — радіальне меню · Коліщатко — масштаб</span>
+    <span>Green Patrol</span>
+  </div>
+</section>
+
+<script>
+  (() => {
+    const homeScreen = document.getElementById('home-screen');
+    const startBtn = document.getElementById('start-game-btn');
+    const introBtn = document.getElementById('home-intro-btn');
+    const modelToggle = document.getElementById('home-model-toggle');
+    const modelInfo = document.getElementById('home-model-info');
+    const modeCards = document.querySelectorAll('.home-mode-card');
+
+    let selectedModeBtnId = 'mode-planning-btn';
+
+    modeCards.forEach((card) => {
+      card.addEventListener('click', () => {
+        modeCards.forEach((c) => {
+          c.classList.remove('is-selected');
+          c.setAttribute('aria-checked', 'false');
+        });
+        card.classList.add('is-selected');
+        card.setAttribute('aria-checked', 'true');
+        selectedModeBtnId = card.dataset.targetMode || 'mode-planning-btn';
+      });
+    });
+
+    function enterGame({ skipIntro = true } = {}) {
+      if (skipIntro) {
+        document.getElementById('skip-intro-btn')?.click();
+        const introOverlay = document.getElementById('intro-overlay');
+        if (introOverlay) introOverlay.classList.add('hidden');
+      }
+
+      const targetModeBtn = document.getElementById(selectedModeBtnId);
+      if (targetModeBtn) targetModeBtn.click();
+
+      homeScreen.classList.add('is-leaving');
+      setTimeout(() => {
+        homeScreen.classList.add('hidden');
+      }, 220);
+    }
+
+    startBtn?.addEventListener('click', () => enterGame({ skipIntro: true }));
+    introBtn?.addEventListener('click', () => enterGame({ skipIntro: false }));
+
+    modelToggle?.addEventListener('click', () => {
+      const isHidden = modelInfo.classList.toggle('hidden');
+      modelToggle.setAttribute('aria-expanded', String(!isHidden));
+    });
+  })();
+</script>
 </html>
